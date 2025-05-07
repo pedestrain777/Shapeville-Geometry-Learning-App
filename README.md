@@ -14,7 +14,7 @@
    cd shapeville
    ```
 
-2. Build with Maven:(命令行切换到项目根目录，然后执行底下这句话，需要先下载并配置mvn)
+2. Build with Maven:(命令行切换到项目根目录，然后执行底下这句话，需要先下载并配置mvn.可以先运行mvn -v语句，输出版本号就配置成功了)
    ```bash
    mvn clean install
    ```
