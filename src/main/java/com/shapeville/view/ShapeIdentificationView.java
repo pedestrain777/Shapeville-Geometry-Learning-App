@@ -30,6 +30,8 @@ public class ShapeIdentificationView extends VBox {
     private Random random;
     private Label scoreLabel;
     private Label progressLabel;
+    private Slider rotationSliderY; // Y 轴旋转滑条
+    private Slider rotationSliderX; // X 轴旋转滑条
 
     public ShapeIdentificationView(GameController gameController) {
         this.gameController = gameController;
@@ -119,7 +121,7 @@ public class ShapeIdentificationView extends VBox {
         Label taskLabel = new Label("Identify the shape:");
         taskLabel.setStyle(labelStyle);
 
-        // Add all components
+        // Add components
         getChildren().addAll(
                 infoBox,
                 modeBox,
@@ -128,8 +130,42 @@ public class ShapeIdentificationView extends VBox {
                 inputBox,
                 messageLabel);
 
-        // Update score and progress
         updateScoreAndProgress();
+
+        // Y-axis rotation slider
+        rotationSliderY = new Slider(0, 360, 0);
+        rotationSliderY.setBlockIncrement(1);
+        rotationSliderY.setMajorTickUnit(90);
+        rotationSliderY.setMinorTickCount(9);
+        rotationSliderY.setShowTickMarks(true);
+        rotationSliderY.setShowTickLabels(true);
+        rotationSliderY.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (currentShape != null) {
+                currentShape.setRotationY(newVal.doubleValue());
+                redrawShape();
+            }
+        });
+
+        // X-axis rotation slider
+        rotationSliderX = new Slider(0, 360, 0);
+        rotationSliderX.setBlockIncrement(1);
+        rotationSliderX.setMajorTickUnit(90);
+        rotationSliderX.setMinorTickCount(9);
+        rotationSliderX.setShowTickMarks(true);
+        rotationSliderX.setShowTickLabels(true);
+        rotationSliderX.valueProperty().addListener((obs, oldVal, newVal) -> {
+            if (currentShape != null) {
+                currentShape.setRotationX(newVal.doubleValue());
+                redrawShape();
+            }
+        });
+
+        // Rotation controls container
+        HBox rotationBox = new HBox(10,
+                new Label("Rotate Y:"), rotationSliderY,
+                new Label("Rotate X:"), rotationSliderX);
+        rotationBox.setAlignment(Pos.CENTER);
+        getChildren().add(rotationBox);
     }
 
     private void updateScoreAndProgress() {
@@ -139,47 +175,39 @@ public class ShapeIdentificationView extends VBox {
 
     private void showNextShape() {
         attempts = 0;
-        List<Shape> shapeList = is3DMode ? shapes3D : shapes2D;
-        currentShape = shapeList.get(random.nextInt(shapeList.size()));
-        currentShape.setPosition(
-                (canvas.getWidth() - 100) / 2,
-                (canvas.getHeight() - 100) / 2);
+        List<Shape> list = is3DMode ? shapes3D : shapes2D;
+        currentShape = list.get(random.nextInt(list.size()));
+        currentShape.setPosition((canvas.getWidth() - 100) / 2, (canvas.getHeight() - 100) / 2);
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         currentShape.draw(gc);
         answerField.clear();
         messageLabel.setText("");
         answerField.requestFocus();
+        // Reset rotation sliders
+        rotationSliderY.setValue(0);
+        rotationSliderX.setValue(0);
     }
 
     private void checkAnswer() {
         attempts++;
-        String answer = answerField.getText().trim();
-        if (currentShape.isCorrectName(answer)) {
+        String ans = answerField.getText().trim();
+        if (currentShape.isCorrectName(ans)) {
             messageLabel.setText("Correct! Well done!");
             messageLabel.setTextFill(Color.GREEN);
             gameController.addPoints(attempts, is3DMode);
-            gameController.taskCompleted(1); // Shape identification is task 1
+            gameController.taskCompleted(1);
             updateScoreAndProgress();
-
             new Thread(() -> {
-                try {
-                    Thread.sleep(1500);
-                    javafx.application.Platform.runLater(this::showNextShape);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                try { Thread.sleep(1500); } catch (InterruptedException ignored) {}
+                javafx.application.Platform.runLater(this::showNextShape);
             }).start();
         } else {
             if (attempts >= 3) {
                 messageLabel.setText("Correct answer is: " + currentShape.getName());
                 messageLabel.setTextFill(Color.RED);
                 new Thread(() -> {
-                    try {
-                        Thread.sleep(2000);
-                        javafx.application.Platform.runLater(this::showNextShape);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
+                    javafx.application.Platform.runLater(this::showNextShape);
                 }).start();
             } else {
                 messageLabel.setText("Try again! Attempt " + attempts + " of 3");
@@ -187,6 +215,13 @@ public class ShapeIdentificationView extends VBox {
                 answerField.clear();
                 answerField.requestFocus();
             }
+        }
+    }
+
+    private void redrawShape() {
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        if (currentShape != null) {
+            currentShape.draw(gc);
         }
     }
 }
