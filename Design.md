@@ -38,7 +38,10 @@ Shapeville是一个交互式Java应用程序，旨在帮助小学生（5-10岁�
 - 与2D形状相同的流程 **[已实现]** - 使用相同的界面组件
 - 基本3D形状：cube, cuboid, cylinder, sphere, triangular prism, square-based pyramid, cone, tetrahedron **[已实现]** - 所有3D形状类都已创建
 
-**[其它问题]** - progress有问题，3D绘制效果差，退出机制有问题
+**[其它问题]** - progress有问题，3D绘制效果差，退出机制有问题 **[已解决]** 
+- progress计算修改：原先是按totaltasks = 6（这是总任务）；本task1按答对4道题计算，一道题25%；上方进度条可以再用来表示总6个的进度
+-  当用户答对 4 题时，弹出一个对话框，提示“继续”还是“重新开始”，根据选择决定是否继续出题还是重置进度。还是重置进度。
+-  3D图形全部重新绘制，加以旋转与明暗变化
 
 #### Task 2: 角度类型识别（Identification of Angle Types）
 **基础级评分**
