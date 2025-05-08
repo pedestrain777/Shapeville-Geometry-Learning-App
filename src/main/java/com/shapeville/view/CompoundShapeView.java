@@ -29,6 +29,7 @@ public class CompoundShapeView extends VBox {
     private Timer timer;
     private int timeRemaining;
     private int currentShapeIndex;
+    private Random random;
 
     public CompoundShapeView(GameController gameController) {
         this.gameController = gameController;
