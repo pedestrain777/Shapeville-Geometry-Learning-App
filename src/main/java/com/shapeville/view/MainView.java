@@ -20,6 +20,10 @@ public class MainView extends VBox {
         initializeUI();
     }
 
+    public GameController getGameController() {
+        return gameController;
+    }
+
     private void initializeUI() {
         setSpacing(10);
         setPadding(new Insets(10));

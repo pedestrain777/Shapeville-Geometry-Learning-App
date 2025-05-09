@@ -45,6 +45,10 @@ public class GameController {
     public int getCurrentScore() {
         return currentScore;
     }
+    
+    public void setCurrentScore(int score) {
+        this.currentScore = score;
+    }
 
     public double getProgress() {
         return (double) completedTasks / totalTasks;

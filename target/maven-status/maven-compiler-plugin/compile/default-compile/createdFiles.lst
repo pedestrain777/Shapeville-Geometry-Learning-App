@@ -17,6 +17,7 @@ com\shapeville\Main.class
 com\shapeville\view\CircleCalculationView$1.class
 com\shapeville\controller\GameController.class
 com\shapeville\model\Hexagon.class
+com\shapeville\model\Parallelogram.class
 com\shapeville\view\AreaCalculationView.class
 com\shapeville\model\Kite.class
 com\shapeville\model\Sphere.class
@@ -30,6 +31,7 @@ com\shapeville\model\Circle.class
 com\shapeville\model\Triangle.class
 com\shapeville\model\Heptagon.class
 com\shapeville\model\Pentagon.class
+com\shapeville\model\Trapezium.class
 com\shapeville\view\CompoundShapeView.class
 com\shapeville\model\Rhombus.class
 com\shapeville\model\Shape.class
