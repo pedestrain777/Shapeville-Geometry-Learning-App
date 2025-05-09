@@ -123,4 +123,13 @@ public class Cuboid extends Shape {
                     proj[e[1]][0], proj[e[1]][1]);
         }
     }
+    @Override
+    public Cuboid copy() {
+        Cuboid newCuboid = new Cuboid(this.width, this.height, this.depth);
+        newCuboid.setColor(this.getColor());
+        newCuboid.setPosition(this.x, this.y);
+        newCuboid.setRotationX(this.rotationX);
+        newCuboid.setRotationY(this.rotationY);
+        return newCuboid;
+    }
 }

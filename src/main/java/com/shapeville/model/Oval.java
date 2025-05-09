@@ -21,4 +21,13 @@ public class Oval extends Shape2D {
         gc.strokeOval(x, y, width, height);
         gc.fillOval(x, y, width, height);
     }
+    @Override
+    public Oval copy() {
+        Oval newOval = new Oval(this.width, this.height);
+        newOval.setColor(this.getColor());
+        newOval.setPosition(this.x, this.y);
+        newOval.setRotationX(this.rotationX);
+        newOval.setRotationY(this.rotationY);
+        return newOval;
+    }
 }

@@ -31,4 +31,15 @@ public class Hexagon extends Shape2D {
         gc.strokePolygon(xPoints, yPoints, 6);
         gc.fillPolygon(xPoints, yPoints, 6);
     }
+
+    // 关键新增
+    @Override
+    public Hexagon copy() {
+        Hexagon newHexagon = new Hexagon(this.width);
+        newHexagon.setColor(this.getColor());
+        newHexagon.setPosition(this.x, this.y);
+        newHexagon.setRotationX(this.rotationX);
+        newHexagon.setRotationY(this.rotationY);
+        return newHexagon;
+    }
 }

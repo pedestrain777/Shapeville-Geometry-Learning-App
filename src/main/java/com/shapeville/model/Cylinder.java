@@ -148,4 +148,13 @@ public class Cylinder extends Shape {
         double len = Math.hypot(Math.hypot(n[0], n[1]), n[2]);
         return new double[]{ n[0]/len, n[1]/len, n[2]/len };
     }
+    @Override
+    public Cylinder copy() {
+        Cylinder newCylinder = new Cylinder(this.radius, this.height);
+        newCylinder.setColor(this.getColor());
+        newCylinder.setPosition(this.x, this.y);
+        newCylinder.setRotationX(this.rotationX);
+        newCylinder.setRotationY(this.rotationY);
+        return newCylinder;
+    }
 }

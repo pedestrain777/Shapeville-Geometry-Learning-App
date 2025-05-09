@@ -10,7 +10,6 @@ public class Kite extends Shape2D {
 
     @Override
     public double calculateArea() {
-        // 风筝面积公式: (d1 * d2) / 2
         return width * height / 2;
     }
 
@@ -33,5 +32,16 @@ public class Kite extends Shape2D {
         yPoints[3] = centerY;
         gc.strokePolygon(xPoints, yPoints, 4);
         gc.fillPolygon(xPoints, yPoints, 4);
+    }
+
+    // 关键新增
+    @Override
+    public Kite copy() {
+        Kite newKite = new Kite(this.width, this.height);
+        newKite.setColor(this.getColor());
+        newKite.setPosition(this.x, this.y);
+        newKite.setRotationX(this.rotationX);
+        newKite.setRotationY(this.rotationY);
+        return newKite;
     }
 }

@@ -31,4 +31,13 @@ public class Pentagon extends Shape2D {
         gc.strokePolygon(xPoints, yPoints, 5);
         gc.fillPolygon(xPoints, yPoints, 5);
     }
+    @Override
+    public Pentagon copy() {
+        Pentagon newPentagon = new Pentagon(this.width); // width 就是 side
+        newPentagon.setColor(this.getColor());
+        newPentagon.setPosition(this.x, this.y);
+        newPentagon.setRotationX(this.rotationX);
+        newPentagon.setRotationY(this.rotationY);
+        return newPentagon;
+    }
 }

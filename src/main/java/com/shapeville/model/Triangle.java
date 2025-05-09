@@ -62,4 +62,14 @@ public class Triangle extends Shape2D {
         this.height = height;
         super.setHeight(height);
     }
+
+    @Override
+    public Triangle copy() {
+        Triangle newTriangle = new Triangle(this.base, this.height);
+        newTriangle.setColor(this.getColor());
+        newTriangle.setPosition(this.x, this.y);
+        newTriangle.setRotationX(this.rotationX);
+        newTriangle.setRotationY(this.rotationY);
+        return newTriangle;
+    }
 }

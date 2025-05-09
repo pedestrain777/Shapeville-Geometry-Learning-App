@@ -30,4 +30,13 @@ public class Rectangle extends Shape2D {
     public String getFormulaWithValues() {
         return String.format("Area = %.1f × %.1f = %.1f", width, height, calculateArea());
     }
+    @Override
+    public Rectangle copy() {
+        Rectangle newRectangle = new Rectangle(this.width, this.height);
+        newRectangle.setColor(this.getColor());
+        newRectangle.setPosition(this.x, this.y);
+        newRectangle.setRotationX(this.rotationX);
+        newRectangle.setRotationY(this.rotationY);
+        return newRectangle;
+    }
 } 

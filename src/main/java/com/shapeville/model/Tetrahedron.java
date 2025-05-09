@@ -101,4 +101,13 @@ public class Tetrahedron extends Shape {
         gc.setStroke(Color.DARKGRAY);
         gc.strokePolygon(xBase, yBase, 3);
     }
+    @Override
+    public Tetrahedron copy() {
+        Tetrahedron newTetra = new Tetrahedron(this.size);
+        newTetra.setColor(this.getColor());
+        newTetra.setPosition(this.x, this.y);
+        newTetra.setRotationX(this.rotationX);
+        newTetra.setRotationY(this.rotationY);
+        return newTetra;
+    }
 }

@@ -34,4 +34,13 @@ public class Rhombus extends Shape2D {
         gc.strokePolygon(xPoints, yPoints, 4);
         gc.fillPolygon(xPoints, yPoints, 4);
     }
+    @Override
+    public Rhombus copy() {
+        Rhombus newRhombus = new Rhombus(this.width, this.height);
+        newRhombus.setColor(this.getColor());
+        newRhombus.setPosition(this.x, this.y);
+        newRhombus.setRotationX(this.rotationX);
+        newRhombus.setRotationY(this.rotationY);
+        return newRhombus;
+    }
 }

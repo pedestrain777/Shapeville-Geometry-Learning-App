@@ -128,4 +128,13 @@ public class Cube extends Shape {
             gc.strokePolygon(xs, ys, 4);
         }
     }
+    @Override
+    public Cube copy() {
+        Cube newCube = new Cube(this.size);
+        newCube.setColor(this.getColor());
+        newCube.setPosition(this.x, this.y);
+        newCube.setRotationX(this.rotationX);
+        newCube.setRotationY(this.rotationY);
+        return newCube;
+    }
 }

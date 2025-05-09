@@ -21,4 +21,13 @@ public class Square extends Shape2D {
         gc.strokeRect(x, y, width, width);
         gc.fillRect(x, y, width, width);
     }
+    @Override
+    public Square copy() {
+        Square newSquare = new Square(this.width); // width 就是 side
+        newSquare.setColor(this.getColor());
+        newSquare.setPosition(this.x, this.y);
+        newSquare.setRotationX(this.rotationX);
+        newSquare.setRotationY(this.rotationY);
+        return newSquare;
+    }
 }

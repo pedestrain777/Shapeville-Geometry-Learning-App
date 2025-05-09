@@ -54,4 +54,15 @@ public class Circle extends Shape2D {
         this.width = radius * 2;
         this.height = radius * 2;
     }
-} 
+
+    // 新增circle的copy
+    @Override
+    public Circle copy() {
+        Circle newCircle = new Circle(this.radius);
+        newCircle.setColor(this.getColor());
+        newCircle.setPosition(this.x, this.y);
+        newCircle.setRotationX(this.rotationX);
+        newCircle.setRotationY(this.rotationY);
+        return newCircle;
+    }
+}

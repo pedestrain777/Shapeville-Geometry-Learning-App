@@ -11,8 +11,11 @@ import javafx.scene.layout.HBox;
 import com.shapeville.controller.GameController;
 import com.shapeville.model.*;
 import javafx.scene.paint.Color;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
@@ -38,6 +41,13 @@ public class ShapeIdentificationView extends VBox {
     private int completed2DCount = 0;
     private int completed3DCount = 0;
     private Button restartButton;
+    // ---- 新增：旋转标签 ----
+    private Label rotationYLabel;
+    private Label rotationXLabel;
+
+    // ----------- 本轮题库与索引，防止重复 -----------
+    private List<Shape> currentRoundShapes = new ArrayList<>();
+    private int currentShapeIndex = 0;
 
     public ShapeIdentificationView(GameController gameController) {
         this.gameController = gameController;
@@ -45,6 +55,7 @@ public class ShapeIdentificationView extends VBox {
         this.random = new Random();
         initializeShapes();
         setupUI();
+        prepareNewRoundShapes();
         showNextShape();
     }
 
@@ -104,7 +115,9 @@ public class ShapeIdentificationView extends VBox {
             is3DMode = btn3D.isSelected();
             completed2DCount = 0;
             completed3DCount = 0;
+            prepareNewRoundShapes();
             restartButton.setVisible(false);
+            updateRotationControls();
             showNextShape();
         });
 
@@ -151,9 +164,12 @@ public class ShapeIdentificationView extends VBox {
             }
         });
 
+        // --- 新增：分别声明标签，并存为成员变量 ---
+        rotationYLabel = new Label("Rotate Y:");
+        rotationXLabel = new Label("Rotate X:");
         HBox rotationBox = new HBox(10,
-                new Label("Rotate Y:"), rotationSliderY,
-                new Label("Rotate X:"), rotationSliderX
+                rotationYLabel, rotationSliderY,
+                rotationXLabel, rotationSliderX
         );
         rotationBox.setAlignment(Pos.CENTER);
         getChildren().add(rotationBox);
@@ -164,12 +180,21 @@ public class ShapeIdentificationView extends VBox {
         getChildren().add(restartButton);
     }
 
+    private void prepareNewRoundShapes() {
+        List<Shape> sourceList = is3DMode ? shapes3D : shapes2D;
+        currentRoundShapes = new ArrayList<>(sourceList);
+        Collections.shuffle(currentRoundShapes, random);
+        currentShapeIndex = 0;
+    }
+
     private void restartGame() {
         gameController.reset();
         completed2DCount = 0;
         completed3DCount = 0;
         updateScoreAndProgress();
+        prepareNewRoundShapes();
         restartButton.setVisible(false);
+        updateRotationControls();
         showNextShape();
     }
 
@@ -184,7 +209,6 @@ public class ShapeIdentificationView extends VBox {
         return slider;
     }
 
-    //每答对一题增加25%；进度条，最多100%
     private void updateScoreAndProgress() {
         int completed = is3DMode ? completed3DCount : completed2DCount;
         double progress = Math.min((double) completed / 4, 1.0);
@@ -193,19 +217,35 @@ public class ShapeIdentificationView extends VBox {
     }
 
     private void showNextShape() {
-        if ((!is3DMode && completed2DCount >= 4) || (is3DMode && completed3DCount >= 4)) {
-            // 弹出选择对话框
+        int completed = is3DMode ? completed3DCount : completed2DCount;
+        // 一轮4题后，重新洗牌
+        if (completed % 4 == 0) {
+            prepareNewRoundShapes();
+        }
+
+        if (completed >= 4) {
             showCompletionDialog();
             return;
         }
 
         attempts = 0;
-        List<Shape> list = is3DMode ? shapes3D : shapes2D;
-        currentShape = list.get(random.nextInt(list.size()));
+
+        // 本轮顺序取题，不重复
+        Shape template = currentRoundShapes.get(currentShapeIndex);
+        currentShapeIndex++;
+        // 用copy方法生成全新对象以避免形状被改变
+        currentShape = template.copy();
+
         currentShape.setPosition(
                 (canvas.getWidth() - 100) / 2,
                 (canvas.getHeight() - 100) / 2
         );
+
+        // 如果是2D，旋转角度归零（确保切换回来时无痕迹）
+        if (!is3DMode && currentShape != null) {
+            currentShape.setRotationX(0);
+            currentShape.setRotationY(0);
+        }
         rotationSliderY.setValue(0);
         rotationSliderX.setValue(0);
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -213,6 +253,8 @@ public class ShapeIdentificationView extends VBox {
         answerField.clear();
         messageLabel.setText("");
         answerField.requestFocus();
+
+        updateRotationControls();
     }
 
     private void showCompletionDialog() {
@@ -229,15 +271,16 @@ public class ShapeIdentificationView extends VBox {
 
             alert.showAndWait().ifPresent(response -> {
                 if (response == continueButton) {
-                    // 继续答题，分数保持
+                    // 继续四题轮答，分数保持，但本轮题集重新洗牌
                     if (is3DMode) {
                         completed3DCount = 0;
                     } else {
                         completed2DCount = 0;
                     }
+                    prepareNewRoundShapes();
                     showNextShape();
                 } else {
-                    // 重置一局
+                    // 重新一局（分数清零）
                     restartGame();
                 }
             });
@@ -259,27 +302,20 @@ public class ShapeIdentificationView extends VBox {
                 completed2DCount++;
             }
 
-            updateScoreAndProgress();  // ⬅️ 把这个放在计数递增后
+            updateScoreAndProgress();
 
-            new Thread(() -> {
-                try {
-                    Thread.sleep(800);
-                } catch (InterruptedException ignored) {
-                }
-                Platform.runLater(this::showNextShape);
-            }).start();
+            PauseTransition pt = new PauseTransition(Duration.millis(800));
+            pt.setOnFinished(e -> showNextShape());
+            pt.play();
 
         } else {
             if (attempts >= 3) {
                 messageLabel.setText("Correct answer is: " + currentShape.getName());
                 messageLabel.setTextFill(Color.RED);
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ignored) {
-                    }
-                    Platform.runLater(this::showNextShape);
-                }).start();
+
+                PauseTransition pt = new PauseTransition(Duration.millis(2000));
+                pt.setOnFinished(e -> showNextShape());
+                pt.play();
             } else {
                 messageLabel.setText("Try again! Attempt " + attempts + " of 3");
                 messageLabel.setTextFill(Color.RED);
@@ -293,6 +329,26 @@ public class ShapeIdentificationView extends VBox {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         if (currentShape != null) {
             currentShape.draw(gc);
+        }
+    }
+
+    // 切换2D/3D时控制旋转滑块和标签的显示隐藏，并在切换到2D模式时归零旋转。
+
+    private void updateRotationControls() {
+        boolean enable = is3DMode;
+        rotationSliderX.setDisable(!enable);
+        rotationSliderY.setDisable(!enable);
+        rotationSliderX.setVisible(enable);
+        rotationSliderY.setVisible(enable);
+        // 新增：标签同步隐藏
+        if (rotationYLabel != null) rotationYLabel.setVisible(enable);
+        if (rotationXLabel != null) rotationXLabel.setVisible(enable);
+
+        // 如果切换到2D，归零旋转并重绘
+        if (!enable && currentShape != null) {
+            currentShape.setRotationX(0);
+            currentShape.setRotationY(0);
+            redrawShape();
         }
     }
 }

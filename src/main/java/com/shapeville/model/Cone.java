@@ -114,4 +114,14 @@ public class Cone extends Shape {
         double len = Math.hypot(Math.hypot(n[0], n[1]), n[2]);
         return new double[]{n[0] / len, n[1] / len, n[2] / len};
     }
+
+    @Override
+    public Cone copy() {
+        Cone newCone = new Cone(this.radius, this.height);
+        newCone.setColor(this.getColor());
+        newCone.setPosition(this.x, this.y);
+        newCone.setRotationX(this.rotationX);
+        newCone.setRotationY(this.rotationY);
+        return newCone;
+    }
 }

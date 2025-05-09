@@ -59,4 +59,7 @@ public abstract class Shape {
     public void setColor(Color color) {
         this.color = color;
     }
+
+    //新增的copy方法，防止形状改变后被记录
+    public abstract Shape copy();
 }

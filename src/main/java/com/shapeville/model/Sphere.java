@@ -76,5 +76,13 @@ public class Sphere extends Shape {
             }
         }
     }
-
+    @Override
+    public Sphere copy() {
+        Sphere newSphere = new Sphere(this.radius);
+        newSphere.setColor(this.getColor());
+        newSphere.setPosition(this.x, this.y);
+        newSphere.setRotationX(this.rotationX);
+        newSphere.setRotationY(this.rotationY);
+        return newSphere;
+    }
 }

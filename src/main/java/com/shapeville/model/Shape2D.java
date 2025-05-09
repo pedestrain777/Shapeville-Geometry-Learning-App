@@ -27,4 +27,8 @@ public abstract class Shape2D extends Shape {
     public void setHeight(double height) {
         this.height = height;
     }
-} 
+
+
+    @Override
+    public abstract Shape2D copy();
+}

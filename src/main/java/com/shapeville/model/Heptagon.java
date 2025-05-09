@@ -31,4 +31,15 @@ public class Heptagon extends Shape2D {
         gc.strokePolygon(xPoints, yPoints, 7);
         gc.fillPolygon(xPoints, yPoints, 7);
     }
+
+    // 关键新增
+    @Override
+    public Heptagon copy() {
+        Heptagon newHeptagon = new Heptagon(this.width);
+        newHeptagon.setColor(this.getColor());
+        newHeptagon.setPosition(this.x, this.y);
+        newHeptagon.setRotationX(this.rotationX);
+        newHeptagon.setRotationY(this.rotationY);
+        return newHeptagon;
+    }
 }

@@ -31,4 +31,14 @@ public class Octagon extends Shape2D {
         gc.strokePolygon(xPoints, yPoints, 8);
         gc.fillPolygon(xPoints, yPoints, 8);
     }
+
+    @Override
+    public Octagon copy() {
+        Octagon newOctagon = new Octagon(this.width); // width 就是 side
+        newOctagon.setColor(this.getColor());
+        newOctagon.setPosition(this.x, this.y);
+        newOctagon.setRotationX(this.rotationX);
+        newOctagon.setRotationY(this.rotationY);
+        return newOctagon;
+    }
 }

@@ -103,5 +103,13 @@ public class SquarePyramid extends Shape {
             gc.strokePolygon(xPts, yPts, 3);
         }
     }
-
+    @Override
+    public SquarePyramid copy() {
+        SquarePyramid newPyramid = new SquarePyramid(this.base, this.height);
+        newPyramid.setColor(this.getColor());
+        newPyramid.setPosition(this.x, this.y);
+        newPyramid.setRotationX(this.rotationX);
+        newPyramid.setRotationY(this.rotationY);
+        return newPyramid;
+    }
 }

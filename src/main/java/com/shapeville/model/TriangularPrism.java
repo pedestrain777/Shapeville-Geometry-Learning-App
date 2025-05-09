@@ -116,5 +116,13 @@ public class TriangularPrism extends Shape {
             gc.strokePolygon(xs, ys, face.length);
         }
     }
-
+    @Override
+    public TriangularPrism copy() {
+        TriangularPrism newPrism = new TriangularPrism(this.base, this.height, this.length);
+        newPrism.setColor(this.getColor());
+        newPrism.setPosition(this.x, this.y);
+        newPrism.setRotationX(this.rotationX);
+        newPrism.setRotationY(this.rotationY);
+        return newPrism;
+    }
 }
