@@ -4,7 +4,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 
 public class Angle {
-    private double value;
+   private double value;
     private AngleType type;
     private double x;
     private double y;
@@ -34,27 +34,31 @@ public class Angle {
         gc.setStroke(Color.BLUE);
         gc.setLineWidth(2);
 
-        // Draw first line (horizontal)
+        // Draw first line (horizontal, 0° 起始)
         gc.strokeLine(x, y, x + radius, y);
 
-        // Calculate end point of second line
+        // 计算第二条线的终点
         double endX = x + radius * Math.cos(Math.toRadians(value));
         double endY = y - radius * Math.sin(Math.toRadians(value));
-
-        // Draw second line
         gc.strokeLine(x, y, endX, endY);
 
-        // Draw arc
+        // 画弧：除 90° 特殊方块外，其他用 Arc
         if (type == AngleType.RIGHT) {
-            // Draw small square for right angle
-            double squareSize = 15;
-            double sqX = x + squareSize * Math.cos(Math.toRadians(45));
-            double sqY = y - squareSize * Math.sin(Math.toRadians(45));
-            gc.strokeLine(sqX, y, sqX, sqY);
-            gc.strokeLine(sqX, sqY, x + squareSize, sqY);
+            double size = 20;
+            gc.strokeRect(x, y - size, size, size);
         } else {
-            // Draw arc for other angles
-            gc.strokeArc(x - 20, y - 20, 40, 40, 0, -value, javafx.scene.shape.ArcType.OPEN);
+            double arcSize = 40;
+            double arcX = x - arcSize / 2;
+            double arcY = y - arcSize / 2;
+            double startAngle = 0;
+            double arcExtent = value;
+            gc.strokeArc(
+                    arcX, arcY,
+                    arcSize, arcSize,
+                    startAngle,
+                    arcExtent,
+                    javafx.scene.shape.ArcType.OPEN
+            );
         }
     }
 
