@@ -21,6 +21,7 @@ public class AngleIdentificationView extends VBox {
     private Angle currentAngle;
     private int attempts;
     private Random random;
+    private TextField angleInputField;
 
     public AngleIdentificationView(GameController gameController) {
         this.gameController = gameController;
@@ -28,7 +29,6 @@ public class AngleIdentificationView extends VBox {
         setupUI();
         showNextAngle();
     }
-
     private void setupUI() {
         setSpacing(20);
         setPadding(new Insets(20));
@@ -39,9 +39,30 @@ public class AngleIdentificationView extends VBox {
         String smallLabelStyle = "-fx-text-fill: black; -fx-font-size: 12px;";
 
         // Canvas for angle drawing
-        canvas = new Canvas(300, 300);
+        canvas = new Canvas(200, 100);
         gc = canvas.getGraphicsContext2D();
 
+
+        angleInputField = new TextField();
+        angleInputField.setPromptText("Enter angle (0-360)");
+        angleInputField.setMaxWidth(150);
+
+
+        Button setAngleButton = new Button("Set Angle");
+        setAngleButton.setOnAction(e -> {
+            try {
+                int customAngle = Integer.parseInt(angleInputField.getText());
+                if (customAngle < 0 || customAngle > 360) {
+                    messageLabel.setText("Angle must be between 0 and 360.");
+                    messageLabel.setTextFill(Color.RED);
+                    return;
+                }
+                showAngle(customAngle);
+            } catch (NumberFormatException ex) {
+                messageLabel.setText("Please enter a valid number.");
+                messageLabel.setTextFill(Color.RED);
+            }
+        });
         // Answer selection
         answerBox = new ComboBox<>();
         answerBox.getItems().addAll(
@@ -74,28 +95,30 @@ public class AngleIdentificationView extends VBox {
                         "- Straight: exactly 180°\n" +
                         "- Reflex: greater than 180°");
         instructionsLabel.setStyle(smallLabelStyle);
-
         getChildren().addAll(
                 titleLabel,
                 canvas,
+                angleInputField,
+                setAngleButton,
                 instructionsLabel,
                 answerBox,
                 submitButton,
                 messageLabel);
     }
 
-    private void showNextAngle() {
+private void showNextAngle() {
+    int angleValue = 0;
+    showAngle(angleValue);
+}
+
+    private void showAngle(int angleValue) {
         attempts = 0;
-        // Generate random angle (multiples of 10 between 0 and 360)
-        int angleValue = random.nextInt(36) * 10;
         currentAngle = new Angle(angleValue);
         currentAngle.setPosition(canvas.getWidth() / 2, canvas.getHeight() / 2);
 
-        // Clear canvas and draw new angle
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         currentAngle.draw(gc);
 
-        // Reset UI
         answerBox.setValue(null);
         messageLabel.setText("");
         answerBox.requestFocus();
@@ -111,7 +134,17 @@ public class AngleIdentificationView extends VBox {
         }
 
         // Convert answer to enum format
-        String enumFormat = answer.toUpperCase().replace(" ", "_");
+        String enumFormat;
+        switch (answer) {
+            case "Acute Angle":    enumFormat = "ACUTE";    break;
+            case "Right Angle":    enumFormat = "RIGHT";    break;
+            case "Obtuse Angle":   enumFormat = "OBTUSE";   break;
+            case "Straight Angle": enumFormat = "STRAIGHT"; break;
+            case "Reflex Angle":   enumFormat = "REFLEX";   break;
+            default:
+                // 保底——如果你以后加了新类型
+                enumFormat = answer.toUpperCase().replace(" ", "_");
+        }
 
         if (currentAngle.isCorrectType(enumFormat)) {
             messageLabel.setText("Correct! Well done!");
@@ -129,8 +162,16 @@ public class AngleIdentificationView extends VBox {
             }).start();
         } else {
             if (attempts >= 3) {
-                messageLabel.setText("The correct answer is: " +
-                        currentAngle.getType().toString().replace("_", " ") +
+                String correctDisplay;
+                switch (currentAngle.getType()) {
+                    case ACUTE:    correctDisplay = "Acute Angle";    break;
+                    case RIGHT:    correctDisplay = "Right Angle";    break;
+                    case OBTUSE:   correctDisplay = "Obtuse Angle";   break;
+                    case STRAIGHT: correctDisplay = "Straight Angle"; break;
+                    case REFLEX:   correctDisplay = "Reflex Angle";   break;
+                    default:       correctDisplay = currentAngle.getType().toString();
+                }
+                messageLabel.setText("The correct answer is: " + correctDisplay +
                         " (" + currentAngle.getTypeDescription() + ")");
                 messageLabel.setTextFill(Color.RED);
 
