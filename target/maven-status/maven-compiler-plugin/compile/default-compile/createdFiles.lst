@@ -10,6 +10,7 @@ com\shapeville\model\Octagon.class
 com\shapeville\model\Cone.class
 com\shapeville\model\Cuboid.class
 com\shapeville\model\Cylinder.class
+com\shapeville\view\AngleIdentificationView$1.class
 com\shapeville\view\MainView.class
 com\shapeville\view\SectorCalculationView$1.class
 com\shapeville\view\CircleCalculationView.class

@@ -80,6 +80,7 @@ public class Angle {
     }
 
     public AngleType getType() {
+
         return type;
     }
 
