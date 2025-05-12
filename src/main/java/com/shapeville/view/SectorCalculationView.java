@@ -41,11 +41,13 @@ public class SectorCalculationView extends VBox {
         setSpacing(20);
         setPadding(new Insets(20));
         setAlignment(Pos.CENTER);
-
+        String labelStyle = "-fx-text-fill: black; -fx-font-size: 12px;";
         // Calculation type selection
         ToggleGroup calculationType = new ToggleGroup();
         RadioButton areaButton = new RadioButton("Sector Area");
+        areaButton.setStyle(labelStyle);
         RadioButton arcButton = new RadioButton("Arc Length");
+        arcButton.setStyle(labelStyle);
         areaButton.setToggleGroup(calculationType);
         arcButton.setToggleGroup(calculationType);
         areaButton.setSelected(true);
@@ -67,6 +69,7 @@ public class SectorCalculationView extends VBox {
 
         // Timer label
         timerLabel = new Label("Time remaining: 5:00");
+        timerLabel.setStyle(labelStyle);
 
         // Input area
         HBox inputBox = new HBox(10);
@@ -76,21 +79,25 @@ public class SectorCalculationView extends VBox {
         answerField.setPrefWidth(100);
         Button submitButton = new Button("Submit");
         submitButton.setOnAction(e -> checkAnswer());
-        inputBox.getChildren().addAll(new Label("Answer:"), answerField, submitButton);
+        Label answerLabel = new Label("Answer:");
+        answerLabel.setStyle(labelStyle);
+        inputBox.getChildren().addAll(answerLabel, answerField, submitButton);
 
         // Message label
         messageLabel = new Label("");
-        messageLabel.setStyle("-fx-font-size: 14px;");
+        messageLabel.setStyle(labelStyle);
+        // 默认文字颜色也用黑色
+        messageLabel.setTextFill(Color.BLACK);
 
         // Instructions
         Label instructionsLabel = new Label(
-                "Area of sector = (θ/360°) × πr²\n" +
-                        "Length of arc = (θ/360°) × 2πr\n" +
-                        "where θ is the angle in degrees");
-        instructionsLabel.setStyle("-fx-font-size: 12px;");
-
+                "Area of sector = (θ/360°) × πr²      " +
+                        "Length of arc = (θ/360°) × 2πr");
+        instructionsLabel.setStyle(labelStyle);
+        Label title = new Label("Circle Sector Calculations:");
+        title.setStyle(labelStyle);
         getChildren().addAll(
-                new Label("Circle Sector Calculations:"),
+                title,
                 radioBox,
                 canvas,
                 instructionsLabel,
@@ -115,41 +122,51 @@ public class SectorCalculationView extends VBox {
         startTimer();
     }
 
-    private void drawSector() {
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+private void drawSector() {
+    gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-        double centerX = canvas.getWidth() / 2;
-        double centerY = canvas.getHeight() / 2;
-        double radius = currentRadius * 10; // Scale up for display
+    double centerX = canvas.getWidth() / 2;
+    double centerY = canvas.getHeight() / 2;
+    double displayRadius = currentRadius * 10; // 放大比例
 
-        // Draw full circle outline
-        gc.setStroke(Color.LIGHTGRAY);
-        gc.setLineWidth(1);
-        gc.strokeOval(centerX - radius, centerY - radius, radius * 2, radius * 2);
+    // 1) 画全圆轮廓
+    gc.setStroke(Color.LIGHTGRAY);
+    gc.setLineWidth(1);
+    gc.strokeOval(centerX - displayRadius, centerY - displayRadius,
+            displayRadius * 2, displayRadius * 2);
 
-        // Draw sector
-        gc.setFill(Color.LIGHTBLUE);
-        gc.setStroke(Color.BLUE);
-        gc.setLineWidth(2);
+    // 2) 画扇形
+    gc.setFill(Color.LIGHTBLUE);
+    gc.setStroke(Color.BLUE);
+    gc.setLineWidth(2);
+    gc.fillArc(centerX - displayRadius, centerY - displayRadius,
+            displayRadius * 2, displayRadius * 2,
+            0, -currentAngle, ArcType.ROUND);
 
-        // Draw arc
-        gc.strokeArc(centerX - radius, centerY - radius, radius * 2, radius * 2,
-                0, -currentAngle, ArcType.ROUND);
 
-        // Draw radii
-        gc.strokeLine(centerX, centerY,
-                centerX + radius * Math.cos(Math.toRadians(0)),
-                centerY - radius * Math.sin(Math.toRadians(0)));
-        gc.strokeLine(centerX, centerY,
-                centerX + radius * Math.cos(Math.toRadians(currentAngle)),
-                centerY - radius * Math.sin(Math.toRadians(currentAngle)));
+    double markerRadius = displayRadius * 0.3;
+    gc.setStroke(Color.RED);
+    gc.setLineWidth(2);
+    gc.strokeArc(centerX - markerRadius, centerY - markerRadius,
+            markerRadius * 2, markerRadius * 2,
+            0, -currentAngle, ArcType.OPEN);
 
-        // Label dimensions
-        gc.setFill(Color.BLACK);
-        gc.setFont(javafx.scene.text.Font.font(14));
-        gc.fillText("r = " + currentRadius + " units", 10, 20);
-        gc.fillText("θ = " + currentAngle + "°", 10, 40);
-    }
+    // 4) 在扇形内部居中显示角度文字
+    double midAngleRad = Math.toRadians(currentAngle / 2);
+    double textRadius = markerRadius + 15;  // 往外移一点，避免和小弧重叠
+    double textX = centerX + textRadius * Math.cos(midAngleRad);
+    double textY = centerY - textRadius * Math.sin(midAngleRad);
+    gc.setFill(Color.BLACK);
+    gc.setFont(javafx.scene.text.Font.font(16));
+    gc.fillText(String.format("%.0f°", currentAngle), textX - 10, textY + 5);
+
+    // 5) 左上角参数标签
+    gc.setFill(Color.BLACK);
+    gc.setFont(javafx.scene.text.Font.font(14));
+    gc.fillText("r = " + currentRadius + " units", 10, 20);
+    gc.fillText("θ = " + currentAngle + "°", 10, 40);
+}
+
 
     private double calculateSectorArea() {
         return (currentAngle / 360.0) * Math.PI * currentRadius * currentRadius;
