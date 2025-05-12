@@ -28,6 +28,8 @@ public class CircleCalculationView extends VBox {
     private Timer timer;
     private int timeRemaining;
     private boolean isCalculatingArea;
+    private boolean useDiameter;  // 新字段
+
 
     public CircleCalculationView(GameController gameController) {
         this.gameController = gameController;
@@ -84,8 +86,8 @@ public class CircleCalculationView extends VBox {
         messageLabel.setStyle(labelStyle);
 
         Label instructionsLabel = new Label(
-                "Area formula: A = πr²\n" +
-                        "Circumference formula: C = 2πr\n" +
+                "Area formula: A = πr² = πd²/4\n" +
+                        "Circumference formula: C = 2πr = πd\n" +
                         "Use π = 3.14159");
         instructionsLabel.setStyle(labelStyle);
 
@@ -104,19 +106,26 @@ public class CircleCalculationView extends VBox {
 
     private void showNextCircle() {
         attempts = 0;
+
+        // 随机生成一个“半径”值，再决定是否用直径显示
         double radius = random.nextInt(20) + 1;
-        currentCircle = new Circle(radius);
+        boolean useDiameter = random.nextBoolean();
+        double inputValue = useDiameter ? radius * 2 : radius;
+
+        // 用新的构造器
+        currentCircle = new Circle(inputValue, useDiameter);
         currentCircle.setPosition(
                 (canvas.getWidth() - currentCircle.getWidth()) / 2,
                 (canvas.getHeight() - currentCircle.getHeight()) / 2);
 
+        // 清屏并画圆
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
         currentCircle.draw(gc);
 
+        // 显示“Radius = …” 或 “Diameter = …”
         gc.setFill(Color.BLACK);
         gc.setFont(javafx.scene.text.Font.font(14));
-        gc.fillText("Radius = " + radius + " units", 10, 20);
-
+        gc.fillText(currentCircle.getInputText(), 10, 20);
         answerField.clear();
         messageLabel.setText("");
         answerField.requestFocus();

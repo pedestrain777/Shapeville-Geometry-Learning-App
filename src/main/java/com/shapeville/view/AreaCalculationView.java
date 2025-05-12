@@ -10,6 +10,8 @@ import javafx.scene.layout.HBox;
 import com.shapeville.controller.GameController;
 import com.shapeville.model.*;
 import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 import java.util.Random;
 import java.util.Timer;
@@ -134,9 +136,10 @@ public class AreaCalculationView extends VBox {
 
     private void generateShape(String shapeType) {
         // Generate random dimensions between 1 and 20, but multiply by 2 to make shapes larger
-        double dim1 = (random.nextInt(15) + 5) * 2; // 10-40范围
-        double dim2 = (random.nextInt(15) + 5) * 2; // 10-40范围
-        double dim3 = (random.nextInt(10) + 5) * 2; // 10-30范围
+        double dim1 = random.nextInt(20) + 1; // 1 到 20 范围
+        double dim2 = random.nextInt(20) + 1; // 1 到 20 范围
+        double dim3 = random.nextInt(20) + 1; // 1 到 20 范围
+
 
         currentShape = switch (shapeType) {
             case "Rectangle" -> new Rectangle(dim1, dim2);
@@ -164,109 +167,44 @@ public class AreaCalculationView extends VBox {
     }
 
     private void drawDimensions() {
-        gc.setFill(Color.BLACK);
-        gc.setFont(javafx.scene.text.Font.font(14));  // 增大字体
-        
-        // 获取形状的位置
-        double x = currentShape.getX();
-        double y = currentShape.getY();
-        
-        if (currentShape instanceof Rectangle) {
-            Rectangle rect = (Rectangle) currentShape;
-            // 在形状上方和左侧显示标签
-            gc.fillText(String.format("Width: %.1f", rect.getWidth()), 
-                       x + rect.getWidth()/2 - 40, 
-                       y - 15);
-            gc.fillText(String.format("Height: %.1f", rect.getHeight()), 
-                       x - 80, 
-                       y + rect.getHeight()/2);
-                       
-            // 绘制尺寸指示线
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(1);
-            // 宽度指示线
-            gc.strokeLine(x, y - 10, x + rect.getWidth(), y - 10);
-            gc.strokeLine(x, y - 5, x, y - 15);
-            gc.strokeLine(x + rect.getWidth(), y - 5, x + rect.getWidth(), y - 15);
-            // 高度指示线
-            gc.strokeLine(x - 10, y, x - 10, y + rect.getHeight());
-            gc.strokeLine(x - 5, y, x - 15, y);
-            gc.strokeLine(x - 5, y + rect.getHeight(), x - 15, y + rect.getHeight());
-        } 
-        else if (currentShape instanceof Triangle) {
-            Triangle tri = (Triangle) currentShape;
-            // 在三角形底部和左侧显示标签
-            gc.fillText(String.format("Base: %.1f", tri.getBase()), 
-                       x + tri.getWidth()/2 - 30, 
-                       y + tri.getHeight() + 20);
-            gc.fillText(String.format("Height: %.1f", tri.getHeight()), 
-                       x - 80, 
-                       y + tri.getHeight()/2);
-                       
-            // 绘制尺寸指示线
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(1);
-            // 底边指示线
-            gc.strokeLine(x, y + tri.getHeight() + 10, x + tri.getWidth(), y + tri.getHeight() + 10);
-            gc.strokeLine(x, y + tri.getHeight() + 5, x, y + tri.getHeight() + 15);
-            gc.strokeLine(x + tri.getWidth(), y + tri.getHeight() + 5, x + tri.getWidth(), y + tri.getHeight() + 15);
-            // 高度指示线
-            gc.strokeLine(x - 10, y, x - 10, y + tri.getHeight());
-            gc.strokeLine(x - 5, y, x - 15, y);
-            gc.strokeLine(x - 5, y + tri.getHeight(), x - 15, y + tri.getHeight());
+        // Clear the canvas
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+
+        // Image path and info
+        String imagePath = null;
+        String info = "";
+        if (currentShape instanceof Rectangle rect) {
+            imagePath = "/images/rectangle.png";
+            info = String.format("Width: %.1f\nHeight: %.1f", rect.getWidth(), rect.getHeight());
+        } else if (currentShape instanceof Parallelogram para) {
+            imagePath = "/images/parallelogram.png";
+            info = String.format("Base: %.1f\nHeight: %.1f", para.getBase(), para.getHeight());
+        } else if (currentShape instanceof Triangle tri) {
+            imagePath = "/images/triangle.png";
+            info = String.format("Base: %.1f\nHeight: %.1f", tri.getBase(), tri.getHeight());
+        } else if (currentShape instanceof Trapezium trap) {
+            imagePath = "/images/trapezium.png";
+            info = String.format("a: %.1f\nb: %.1f\nHeight: %.1f", trap.getTopWidth(), trap.getBottomWidth(), trap.getHeight());
         }
-        else if (currentShape instanceof Parallelogram) {
-            Parallelogram para = (Parallelogram) currentShape;
-            // 在平行四边形底部和左侧显示标签
-            gc.fillText(String.format("Base: %.1f", para.getBase()), 
-                       x + para.getWidth()/2 - 30, 
-                       y + para.getHeight() + 20);
-            gc.fillText(String.format("Height: %.1f", para.getHeight()), 
-                       x - 80, 
-                       y + para.getHeight()/2);
-                       
-            // 绘制尺寸指示线
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(1);
-            // 底边指示线
-            gc.strokeLine(x, y + para.getHeight() + 10, x + para.getWidth(), y + para.getHeight() + 10);
-            gc.strokeLine(x, y + para.getHeight() + 5, x, y + para.getHeight() + 15);
-            gc.strokeLine(x + para.getWidth(), y + para.getHeight() + 5, x + para.getWidth(), y + para.getHeight() + 15);
-            // 高度指示线
-            gc.strokeLine(x - 10, y, x - 10, y + para.getHeight());
-            gc.strokeLine(x - 5, y, x - 15, y);
-            gc.strokeLine(x - 5, y + para.getHeight(), x - 15, y + para.getHeight());
-        }
-        else if (currentShape instanceof Trapezium) {
-            Trapezium trap = (Trapezium) currentShape;
-            // 在梯形上方、底部和左侧显示标签
-            double offset = (trap.getBottomWidth() - trap.getTopWidth()) / 2;
-            
-            gc.fillText(String.format("a: %.1f", trap.getTopWidth()), 
-                       x + offset + trap.getTopWidth()/2 - 20, 
-                       y - 15);
-            gc.fillText(String.format("c: %.1f", trap.getBottomWidth()), 
-                       x + trap.getBottomWidth()/2 - 20, 
-                       y + trap.getHeight() + 20);
-            gc.fillText(String.format("h: %.1f", trap.getHeight()), 
-                       x - 50, 
-                       y + trap.getHeight()/2);
-                       
-            // 绘制尺寸指示线
-            gc.setStroke(Color.BLACK);
-            gc.setLineWidth(1);
-            // 上底指示线
-            gc.strokeLine(x + offset, y - 10, x + offset + trap.getTopWidth(), y - 10);
-            gc.strokeLine(x + offset, y - 5, x + offset, y - 15);
-            gc.strokeLine(x + offset + trap.getTopWidth(), y - 5, x + offset + trap.getTopWidth(), y - 15);
-            // 下底指示线
-            gc.strokeLine(x, y + trap.getHeight() + 10, x + trap.getBottomWidth(), y + trap.getHeight() + 10);
-            gc.strokeLine(x, y + trap.getHeight() + 5, x, y + trap.getHeight() + 15);
-            gc.strokeLine(x + trap.getBottomWidth(), y + trap.getHeight() + 5, x + trap.getBottomWidth(), y + trap.getHeight() + 15);
-            // 高度指示线
-            gc.strokeLine(x - 10, y, x - 10, y + trap.getHeight());
-            gc.strokeLine(x - 5, y, x - 15, y);
-            gc.strokeLine(x - 5, y + trap.getHeight(), x - 15, y + trap.getHeight());
+
+        if (imagePath != null) {
+            // Load and draw image
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            double imgWidth = 180;
+            double imgHeight = 120;
+            double imgX = 40;
+            double imgY = 50;
+            gc.drawImage(image, imgX, imgY, imgWidth, imgHeight);
+
+            // Draw dimension info on the right
+            gc.setFill(Color.BLACK);
+            gc.setFont(javafx.scene.text.Font.font(16));
+            double textX = imgX + imgWidth + 30;
+            double textY = imgY + 30;
+            for (String line : info.split("\\n")) {
+                gc.fillText(line, textX, textY);
+                textY += 30;
+            }
         }
     }
 
@@ -332,7 +270,10 @@ public class AreaCalculationView extends VBox {
         
         // 记录此形状已完成
         if (currentShape != null) {
-            completedShapes.add(shapeSelector.getValue());
+            String finishedShape = shapeSelector.getValue();
+            completedShapes.add(finishedShape);
+            // 从下拉菜单中移除已完成的形状
+            shapeSelector.getItems().remove(finishedShape);
             
             // 从下拉菜单中移除已完成的形状
             for (Label node : getChildrenOfType(Label.class)) {
@@ -380,7 +321,7 @@ public class AreaCalculationView extends VBox {
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             gc.setFill(Color.BLACK);
             gc.setFont(javafx.scene.text.Font.font(16));
-            gc.fillText("请从上方下拉菜单选择一个形状", 100, 120);
+            gc.fillText("Please select a shape", 100, 120);
         }
     }
 
