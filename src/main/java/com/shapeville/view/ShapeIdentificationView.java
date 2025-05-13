@@ -254,7 +254,7 @@ public class ShapeIdentificationView extends VBox {
         messageLabel.setText("");
         answerField.requestFocus();
 
-        updateRotationControls();
+
     }
 
     private void showCompletionDialog() {
@@ -344,11 +344,11 @@ public class ShapeIdentificationView extends VBox {
         if (rotationYLabel != null) rotationYLabel.setVisible(enable);
         if (rotationXLabel != null) rotationXLabel.setVisible(enable);
 
-        // 如果切换到2D，归零旋转并重绘
-        if (!enable && currentShape != null) {
-            currentShape.setRotationX(0);
-            currentShape.setRotationY(0);
-            redrawShape();
-        }
+//        // 如果切换到2D，归零旋转并重绘
+//        if (!enable && currentShape != null) {
+//            currentShape.setRotationX(0);
+//            currentShape.setRotationY(0);
+//            redrawShape();
+//        }
     }
 }
