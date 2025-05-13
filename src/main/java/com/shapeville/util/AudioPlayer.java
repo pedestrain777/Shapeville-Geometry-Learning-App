@@ -10,6 +10,7 @@ public class AudioPlayer {
             AudioInputStream audioStream = AudioSystem.getAudioInputStream(is);
             Clip clip = AudioSystem.getClip();
             clip.open(audioStream);
+            clip.loop(Clip.LOOP_CONTINUOUSLY);
             clip.start();
         } catch (Exception e) {
             e.printStackTrace();
