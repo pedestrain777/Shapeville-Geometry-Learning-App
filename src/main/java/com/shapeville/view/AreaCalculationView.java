@@ -63,8 +63,20 @@ public class AreaCalculationView extends VBox {
         shapeSelector.setPromptText("Select a shape");
         shapeSelector.setPrefWidth(150);
         shapeSelector.setOnAction(e -> {
-            if (shapeSelector.getValue() != null) {
-                generateShape(shapeSelector.getValue());
+            String selectedShape = shapeSelector.getValue();
+            if (selectedShape != null) {
+                // 清除上一个图形的结果提示
+                messageLabel.setText("");
+                
+                // 检查并移除之前已完成的图形（从下拉菜单中）
+                for (String shape : completedShapes.toArray(new String[0])) {
+                    shapeSelector.getItems().remove(shape);
+                }
+                
+                generateShape(selectedShape);
+                answerField.setDisable(false); // 启用输入框
+            } else {
+                answerField.setDisable(true); // 禁用输入框
             }
         });
         selectorBox.getChildren().addAll(selectLabel, shapeSelector);
@@ -87,6 +99,7 @@ public class AreaCalculationView extends VBox {
         answerField = new TextField();
         answerField.setPromptText("Enter area");
         answerField.setPrefWidth(100);
+        answerField.setDisable(true); // 初始状态下禁用输入框
         Button submitButton = new Button("Submit");
         submitButton.setOnAction(e -> checkAnswer());
         Label areaLabel = new Label("Area:");
@@ -140,6 +153,9 @@ public class AreaCalculationView extends VBox {
         double dim2 = random.nextInt(20) + 1; // 1 到 20 范围
         double dim3 = random.nextInt(20) + 1; // 1 到 20 范围
 
+        // 重置尝试次数和清除消息
+        attempts = 0;
+        messageLabel.setText("");
 
         currentShape = switch (shapeType) {
             case "Rectangle" -> new Rectangle(dim1, dim2);
@@ -169,41 +185,20 @@ public class AreaCalculationView extends VBox {
     private void drawDimensions() {
         // Clear the canvas
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-
-        // Image path and info
-        String imagePath = null;
-        String info = "";
-        if (currentShape instanceof Rectangle rect) {
-            imagePath = "/images/rectangle.png";
-            info = String.format("Width: %.1f\nHeight: %.1f", rect.getWidth(), rect.getHeight());
-        } else if (currentShape instanceof Parallelogram para) {
-            imagePath = "/images/parallelogram.png";
-            info = String.format("Base: %.1f\nHeight: %.1f", para.getBase(), para.getHeight());
-        } else if (currentShape instanceof Triangle tri) {
-            imagePath = "/images/triangle.png";
-            info = String.format("Base: %.1f\nHeight: %.1f", tri.getBase(), tri.getHeight());
-        } else if (currentShape instanceof Trapezium trap) {
-            imagePath = "/images/trapezium.png";
-            info = String.format("a: %.1f\nb: %.1f\nHeight: %.1f", trap.getTopWidth(), trap.getBottomWidth(), trap.getHeight());
-        }
-
-        if (imagePath != null) {
-            // Load and draw image
-            Image image = new Image(getClass().getResourceAsStream(imagePath));
-            double imgWidth = 180;
-            double imgHeight = 120;
-            double imgX = 40;
-            double imgY = 50;
-            gc.drawImage(image, imgX, imgY, imgWidth, imgHeight);
-
-            // Draw dimension info on the right
-            gc.setFill(Color.BLACK);
-            gc.setFont(javafx.scene.text.Font.font(16));
-            double textX = imgX + imgWidth + 30;
-            double textY = imgY + 30;
-            for (String line : info.split("\\n")) {
-                gc.fillText(line, textX, textY);
-                textY += 30;
+        double imgX = 60;
+        double imgY = 50;
+        double imgWidth = 180;
+        double imgHeight = 120;
+        if (currentShape != null) {
+            // 统一调用各自的绘制方法
+            if (currentShape instanceof Trapezium t) {
+                t.draw(gc, imgX, imgY, imgWidth, imgHeight);
+            } else if (currentShape instanceof Rectangle r) {
+                r.draw(gc, imgX, imgY, imgWidth, imgHeight);
+            } else if (currentShape instanceof Parallelogram p) {
+                p.draw(gc, imgX, imgY, imgWidth, imgHeight);
+            } else if (currentShape instanceof Triangle tri) {
+                tri.draw(gc, imgX, imgY, imgWidth, imgHeight);
             }
         }
     }
@@ -251,38 +246,69 @@ public class AreaCalculationView extends VBox {
         currentShape.draw(gc);
         drawDimensions();
         
-        // 显示公式
+        // 显示公式和带入值
         gc.setFill(Color.BLACK);
         gc.setFont(javafx.scene.text.Font.font(14));
-        
         String formula = "";
+        String formulaWithValues = "";
         if (currentShape instanceof Rectangle) {
-            formula = ((Rectangle) currentShape).getFormulaWithValues();
+            formula = ((Rectangle) currentShape).getFormula();
+            formulaWithValues = ((Rectangle) currentShape).getFormulaWithValues();
         } else if (currentShape instanceof Triangle) {
-            formula = ((Triangle) currentShape).getFormulaWithValues();
+            formula = ((Triangle) currentShape).getFormula();
+            formulaWithValues = ((Triangle) currentShape).getFormulaWithValues();
         } else if (currentShape instanceof Parallelogram) {
-            formula = ((Parallelogram) currentShape).getFormulaWithValues();
+            formula = ((Parallelogram) currentShape).getFormula();
+            formulaWithValues = ((Parallelogram) currentShape).getFormulaWithValues();
         } else if (currentShape instanceof Trapezium) {
-            formula = ((Trapezium) currentShape).getFormulaWithValues();
+            formula = ((Trapezium) currentShape).getFormula();
+            formulaWithValues = ((Trapezium) currentShape).getFormulaWithValues();
         }
+        gc.fillText(formula, 10, canvas.getHeight() - 30);
+        gc.fillText(formulaWithValues, 10, canvas.getHeight() - 10);
         
-        gc.fillText(formula, 10, canvas.getHeight() - 10);
-        
-        // 记录此形状已完成
+        // 标记当前形状为已完成，但不立即从下拉菜单移除
         if (currentShape != null) {
-            String finishedShape = shapeSelector.getValue();
-            completedShapes.add(finishedShape);
-            // 从下拉菜单中移除已完成的形状
-            shapeSelector.getItems().remove(finishedShape);
-            
-            // 从下拉菜单中移除已完成的形状
-            for (Label node : getChildrenOfType(Label.class)) {
-                if (node.getText().startsWith("Progress:")) {
-                    updateProgressLabel(node);
-                    break;
+            String currentShapeName = shapeSelector.getValue();
+            if (!completedShapes.contains(currentShapeName)) {
+                completedShapes.add(currentShapeName);
+                
+                // 更新进度显示
+                for (Label node : getChildrenOfType(Label.class)) {
+                    if (node.getText().startsWith("Progress:")) {
+                        updateProgressLabel(node);
+                        break;
+                    }
+                }
+                
+                // 检查是否已完成所有形状
+                if (completedShapes.size() >= 4) {
+                    // 使用延迟显示完成提示，避免界面更新冲突
+                    new Thread(() -> {
+                        try {
+                            Thread.sleep(1000);
+                            javafx.application.Platform.runLater(() -> {
+                                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                                alert.setTitle("Task Completed");
+                                alert.setHeaderText("Great Job!");
+                                alert.setContentText("You have completed all shape area calculations!");
+                                alert.showAndWait();
+                                
+                                // 返回主菜单
+                                MainView mainView = new MainView();
+                                mainView.getGameController().setCurrentScore(gameController.getCurrentScore());
+                                getScene().setRoot(mainView);
+                            });
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    }).start();
                 }
             }
         }
+        
+        // 重置输入字段，准备用户下一步操作
+        answerField.clear();
     }
 
     private <T> Set<T> getChildrenOfType(Class<T> type) {
@@ -293,36 +319,6 @@ public class AreaCalculationView extends VBox {
             }
         }
         return result;
-    }
-
-    private void showNextShape() {
-        attempts = 0;
-        answerField.clear();
-        messageLabel.setText("");
-        if (timer != null) {
-            timer.cancel();
-        }
-        
-        // 如果已完成所有形状，返回主界面
-        if (completedShapes.size() >= 4) {
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Task Completed");
-            alert.setHeaderText("Great Job!");
-            alert.setContentText("You have completed all shape area calculations!");
-            alert.showAndWait();
-            
-            // 返回主菜单
-            MainView mainView = new MainView();
-            mainView.getGameController().setCurrentScore(gameController.getCurrentScore());
-            getScene().setRoot(mainView);
-        } else {
-            // 否则清空当前选择，等待用户选择下一个形状
-            shapeSelector.getSelectionModel().clearSelection();
-            gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-            gc.setFill(Color.BLACK);
-            gc.setFont(javafx.scene.text.Font.font(16));
-            gc.fillText("Please select a shape", 100, 120);
-        }
     }
 
     private void checkAnswer() {
@@ -347,16 +343,6 @@ public class AreaCalculationView extends VBox {
                 gameController.addPoints(attempts, false);
 
                 showSolution();
-
-                // Show next shape after a delay
-                new Thread(() -> {
-                    try {
-                        Thread.sleep(2000);
-                        javafx.application.Platform.runLater(this::showNextShape);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }).start();
             } else {
                 if (attempts >= 3) {
                     if (timer != null) {
@@ -366,16 +352,6 @@ public class AreaCalculationView extends VBox {
                     messageLabel.setTextFill(Color.RED);
 
                     showSolution();
-
-                    // Show next shape after a delay
-                    new Thread(() -> {
-                        try {
-                            Thread.sleep(2000);
-                            javafx.application.Platform.runLater(this::showNextShape);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }).start();
                 } else {
                     messageLabel.setText("Try again! Attempt " + attempts + " of 3");
                     messageLabel.setTextFill(Color.RED);
