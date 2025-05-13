@@ -25,41 +25,55 @@ public class Trapezium extends Shape2D {
         return 0.5 * (topWidth + bottomWidth) * height;
     }
 
+    // 新的绘制方法，参数为绘制区域
+    public void draw(GraphicsContext gc, double imgX, double imgY, double imgWidth, double imgHeight) {
+        gc.setStroke(Color.DARKGRAY);
+        gc.setLineWidth(3);
+        gc.setFill(Color.BLACK);
+        gc.setFont(javafx.scene.text.Font.font(16));
+        double textX = imgX + imgWidth + 30;
+        double textY = imgY + 30;
+        // Draw trapezium
+        double topWidth = imgWidth * 0.6;
+        double bottomWidth = imgWidth;
+        double offset = (bottomWidth - topWidth) / 2;
+        double[] xPoints = {imgX + offset, imgX + offset + topWidth, imgX + bottomWidth, imgX};
+        double[] yPoints = {imgY, imgY, imgY + imgHeight, imgY + imgHeight};
+        gc.strokePolygon(xPoints, yPoints, 4);
+        // Draw top arrow
+        gc.setStroke(Color.RED);
+        gc.setLineWidth(2);
+        gc.strokeLine(imgX + offset, imgY - 15, imgX + offset + topWidth, imgY - 15);
+        gc.strokeLine(imgX + offset, imgY - 10, imgX + offset, imgY - 20);
+        gc.strokeLine(imgX + offset + topWidth, imgY - 10, imgX + offset + topWidth, imgY - 20);
+        gc.setFill(Color.RED);
+        gc.fillText("a", imgX + offset + topWidth / 2 - 5, imgY - 25);
+        // Draw bottom arrow
+        gc.setStroke(Color.ORANGE);
+        gc.setLineWidth(2);
+        gc.strokeLine(imgX, imgY + imgHeight + 15, imgX + bottomWidth, imgY + imgHeight + 15);
+        gc.strokeLine(imgX, imgY + imgHeight + 10, imgX, imgY + imgHeight + 20);
+        gc.strokeLine(imgX + bottomWidth, imgY + imgHeight + 10, imgX + bottomWidth, imgY + imgHeight + 20);
+        gc.setFill(Color.ORANGE);
+        gc.fillText("b", imgX + bottomWidth / 2 - 5, imgY + imgHeight + 35);
+        // Draw height arrow
+        gc.setStroke(Color.PURPLE);
+        gc.setLineWidth(2);
+        gc.strokeLine(imgX + offset, imgY, imgX + offset, imgY + imgHeight);
+        gc.strokeLine(imgX + offset - 5, imgY, imgX + offset + 5, imgY);
+        gc.strokeLine(imgX + offset - 5, imgY + imgHeight, imgX + offset + 5, imgY + imgHeight);
+        gc.setFill(Color.PURPLE);
+        gc.fillText("HEIGHT", imgX + offset - 35, imgY + imgHeight / 2);
+        // Show dimensions
+        gc.setFill(Color.BLACK);
+        gc.fillText(String.format("a: %.1f", getTopWidth()), textX, textY);
+        gc.fillText(String.format("b: %.1f", getBottomWidth()), textX, textY + 30);
+        gc.fillText(String.format("Height: %.1f", getHeight()), textX, textY + 60);
+    }
+
     @Override
     public void draw(GraphicsContext gc) {
-        gc.setFill(color);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2);
-
-        // 计算梯形四个顶点
-        double offset = (bottomWidth - topWidth) / 2;
-        double[] xPoints = {
-            x + offset,                // 左上
-            x + offset + topWidth,     // 右上
-            x + bottomWidth,           // 右下
-            x                          // 左下
-        };
-        
-        double[] yPoints = {
-            y,          // 左上
-            y,          // 右上
-            y + height, // 右下
-            y + height  // 左下
-        };
-
-        gc.strokePolygon(xPoints, yPoints, 4);
-        gc.fillPolygon(xPoints, yPoints, 4);
-        
-        // 绘制高度标识
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(1);
-        gc.strokeLine(x + bottomWidth/2, y + height, x + bottomWidth/2 - (bottomWidth - topWidth)/4, y);
-        
-        // 标注尺寸
-        gc.setFill(Color.BLACK);
-        gc.fillText(String.format("%.1f", topWidth), x + offset + topWidth/2, y - 5);
-        gc.fillText(String.format("%.1f", bottomWidth), x + bottomWidth/2, y + height + 15);
-        gc.fillText(String.format("%.1f", height), x - 15, y + height/2);
+        // Not used in new logic
     }
 
     public String getFormula() {

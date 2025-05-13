@@ -19,40 +19,43 @@ public class Parallelogram extends Shape2D {
         return base * height;
     }
 
+    public void draw(GraphicsContext gc, double imgX, double imgY, double imgWidth, double imgHeight) {
+        gc.setStroke(Color.DARKGRAY);
+        gc.setLineWidth(3);
+        gc.setFill(Color.BLACK);
+        gc.setFont(javafx.scene.text.Font.font(16));
+        double textX = imgX + imgWidth + 30;
+        double textY = imgY + 30;
+        // Draw parallelogram
+        double offset = 40;
+        double[] xPoints = {imgX + offset, imgX + imgWidth, imgX + imgWidth - offset, imgX};
+        double[] yPoints = {imgY, imgY, imgY + imgHeight, imgY + imgHeight};
+        gc.strokePolygon(xPoints, yPoints, 4);
+        // Draw base arrow
+        gc.setStroke(Color.ORANGE);
+        gc.setLineWidth(2);
+        gc.strokeLine(imgX, imgY + imgHeight + 15, imgX + imgWidth - offset, imgY + imgHeight + 15);
+        gc.strokeLine(imgX, imgY + imgHeight + 10, imgX, imgY + imgHeight + 20);
+        gc.strokeLine(imgX + imgWidth - offset, imgY + imgHeight + 10, imgX + imgWidth - offset, imgY + imgHeight + 20);
+        gc.setFill(Color.ORANGE);
+        gc.fillText("BASE", imgX + (imgWidth - offset) / 2 - 20, imgY + imgHeight + 35);
+        // Draw height arrow
+        gc.setStroke(Color.PURPLE);
+        gc.setLineWidth(2);
+        gc.strokeLine(imgX + offset, imgY, imgX + offset, imgY + imgHeight);
+        gc.strokeLine(imgX + offset - 5, imgY, imgX + offset + 5, imgY);
+        gc.strokeLine(imgX + offset - 5, imgY + imgHeight, imgX + offset + 5, imgY + imgHeight);
+        gc.setFill(Color.PURPLE);
+        gc.fillText("HEIGHT", imgX + offset - 35, imgY + imgHeight / 2);
+        // Show dimensions
+        gc.setFill(Color.BLACK);
+        gc.fillText(String.format("Base: %.1f", getBase()), textX, textY);
+        gc.fillText(String.format("Height: %.1f", getHeight()), textX, textY + 30);
+    }
+
     @Override
     public void draw(GraphicsContext gc) {
-        gc.setFill(color);
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2);
-
-        // 计算平行四边形的四个点
-        double offset = height * shearFactor;
-        double[] xPoints = {
-            x + offset,      // 左上
-            x + width + offset, // 右上
-            x + width,       // 右下
-            x               // 左下
-        };
-        
-        double[] yPoints = {
-            y,          // 左上
-            y,          // 右上
-            y + height, // 右下
-            y + height  // 左下
-        };
-
-        gc.strokePolygon(xPoints, yPoints, 4);
-        gc.fillPolygon(xPoints, yPoints, 4);
-        
-        // 绘制高度标识
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(1);
-        gc.strokeLine(x, y + height, x, y);
-        
-        // 标注尺寸
-        gc.setFill(Color.BLACK);
-        gc.fillText(String.format("%.1f", base), x + width/2, y + height + 15);
-        gc.fillText(String.format("%.1f", height), x - 15, y + height/2);
+        // Not used in new logic
     }
 
     public String getFormula() {

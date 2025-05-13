@@ -272,14 +272,14 @@ public class AreaCalculationView extends VBox {
             String currentShapeName = shapeSelector.getValue();
             if (!completedShapes.contains(currentShapeName)) {
                 completedShapes.add(currentShapeName);
-                
+            
                 // 更新进度显示
-                for (Label node : getChildrenOfType(Label.class)) {
-                    if (node.getText().startsWith("Progress:")) {
-                        updateProgressLabel(node);
-                        break;
-                    }
+            for (Label node : getChildrenOfType(Label.class)) {
+                if (node.getText().startsWith("Progress:")) {
+                    updateProgressLabel(node);
+                    break;
                 }
+            }
                 
                 // 检查是否已完成所有形状
                 if (completedShapes.size() >= 4) {
