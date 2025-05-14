@@ -1,5 +1,6 @@
 package com.shapeville.view;
 
+import com.shapeville.util.AudioPlayer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
@@ -566,6 +567,8 @@ public class CompoundShapeView extends VBox {
         if (timer != null) {
             timer.cancel();
         }
+        // 播放答错音效
+        AudioPlayer.playEffect("/audio/wrong.wav");
         messageLabel.setText("Time's up! The correct area is: " +
                 String.format("%.2f", calculateTotalArea()));
         messageLabel.setTextFill(Color.RED);
@@ -670,6 +673,8 @@ public class CompoundShapeView extends VBox {
                 if (timer != null) {
                     timer.cancel();
                 }
+                // 播放答对音效
+                AudioPlayer.playEffect("/audio/correct.wav");
                 messageLabel.setText("Correct! Well done!");
                 messageLabel.setTextFill(Color.GREEN);
                 gameController.addPoints(attempts, true); // Advanced level scoring
@@ -686,6 +691,8 @@ public class CompoundShapeView extends VBox {
                     }
                 }).start();
             } else {
+                // 播放答错音效
+                AudioPlayer.playEffect("/audio/wrong.wav");
                 if (attempts >= 3) {
                     if (timer != null) {
                         timer.cancel();

@@ -1,5 +1,6 @@
 package com.shapeville.view;
 
+import com.shapeville.util.AudioPlayer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
@@ -338,12 +339,16 @@ public class AreaCalculationView extends VBox {
                 if (timer != null) {
                     timer.cancel();
                 }
+                // 播放答对音效
+                AudioPlayer.playEffect("/audio/correct.wav");
                 messageLabel.setText("Correct! Well done!");
                 messageLabel.setTextFill(Color.GREEN);
                 gameController.addPoints(attempts, false);
 
                 showSolution();
             } else {
+                // 播放答错音效
+                AudioPlayer.playEffect("/audio/wrong.wav");
                 if (attempts >= 3) {
                     if (timer != null) {
                         timer.cancel();

@@ -1,5 +1,6 @@
 package com.shapeville.view;
 
+import com.shapeville.util.AudioPlayer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
@@ -147,6 +148,9 @@ private void showNextAngle() {
         }
 
         if (currentAngle.isCorrectType(enumFormat)) {
+            // 播放答对音效
+            AudioPlayer.playEffect("/audio/correct.wav");
+
             messageLabel.setText("Correct! Well done!");
             messageLabel.setTextFill(Color.GREEN);
             gameController.addPoints(attempts, false);
@@ -161,6 +165,9 @@ private void showNextAngle() {
                 }
             }).start();
         } else {
+
+            // 播放答错音效
+            AudioPlayer.playEffect("/audio/wrong.wav");
             if (attempts >= 3) {
                 String correctDisplay;
                 switch (currentAngle.getType()) {

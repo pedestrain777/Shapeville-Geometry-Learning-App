@@ -1,5 +1,6 @@
 package com.shapeville.view;
 
+import com.shapeville.util.AudioPlayer;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -218,30 +219,38 @@ public class ShapeIdentificationView extends VBox {
 
     private void showNextShape() {
         int completed = is3DMode ? completed3DCount : completed2DCount;
-        // 一轮4题后，重新洗牌
-        if (completed % 4 == 0) {
-            prepareNewRoundShapes();
-        }
 
+        // 如果完成了4题弹窗
         if (completed >= 4) {
             showCompletionDialog();
             return;
         }
 
-        attempts = 0;
+        // 每4题重新洗牌和归零索引
+        if (completed % 4 == 0) {
+            prepareNewRoundShapes();
+            currentShapeIndex = 0; // <<< 必须归零
+        }
 
-        // 本轮顺序取题，不重复
+        // 如果 currentShapeIndex 大于等于题库长度，归零
+        if (currentShapeIndex >= currentRoundShapes.size()) {
+            currentShapeIndex = 0;
+        }
+
+        // 实际出题
+        attempts = 0;
+        if(currentRoundShapes.isEmpty()) {
+            messageLabel.setText("No shapes loaded!");
+            return;
+        }
         Shape template = currentRoundShapes.get(currentShapeIndex);
         currentShapeIndex++;
-        // 用copy方法生成全新对象以避免形状被改变
         currentShape = template.copy();
 
         currentShape.setPosition(
                 (canvas.getWidth() - 100) / 2,
                 (canvas.getHeight() - 100) / 2
         );
-
-        // 如果是2D，旋转角度归零（确保切换回来时无痕迹）
         if (!is3DMode && currentShape != null) {
             currentShape.setRotationX(0);
             currentShape.setRotationY(0);
@@ -253,8 +262,6 @@ public class ShapeIdentificationView extends VBox {
         answerField.clear();
         messageLabel.setText("");
         answerField.requestFocus();
-
-
     }
 
     private void showCompletionDialog() {
@@ -291,6 +298,9 @@ public class ShapeIdentificationView extends VBox {
         attempts++;
         String ans = answerField.getText().trim();
         if (currentShape.isCorrectName(ans)) {
+            // 播放答对音效
+            AudioPlayer.playEffect("/audio/correct.wav");
+
             messageLabel.setText("Correct! Well done!");
             messageLabel.setTextFill(Color.GREEN);
             gameController.addPoints(attempts, is3DMode);
@@ -309,6 +319,9 @@ public class ShapeIdentificationView extends VBox {
             pt.play();
 
         } else {
+            // 播放答错音效
+            AudioPlayer.playEffect("/audio/wrong.wav");
+
             if (attempts >= 3) {
                 messageLabel.setText("Correct answer is: " + currentShape.getName());
                 messageLabel.setTextFill(Color.RED);
@@ -344,11 +357,6 @@ public class ShapeIdentificationView extends VBox {
         if (rotationYLabel != null) rotationYLabel.setVisible(enable);
         if (rotationXLabel != null) rotationXLabel.setVisible(enable);
 
-//        // 如果切换到2D，归零旋转并重绘
-//        if (!enable && currentShape != null) {
-//            currentShape.setRotationX(0);
-//            currentShape.setRotationY(0);
-//            redrawShape();
-//        }
+
     }
 }

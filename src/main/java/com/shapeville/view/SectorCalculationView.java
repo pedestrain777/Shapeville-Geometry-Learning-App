@@ -1,5 +1,6 @@
 package com.shapeville.view;
 
+import com.shapeville.util.AudioPlayer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.canvas.Canvas;
@@ -204,6 +205,8 @@ private void drawSector() {
     }
 
     private void timeUp() {
+        // 播放答错音效
+        AudioPlayer.playEffect("/audio/wrong.wav");
         timer.cancel();
         double correctAnswer = isCalculatingArea ? calculateSectorArea() : calculateArcLength();
         messageLabel.setText("Time's up! The correct answer is: " +
@@ -235,6 +238,8 @@ private void drawSector() {
 
             // Allow for small rounding differences
             if (Math.abs(answer - correctAnswer) < 0.1) {
+                // 播放答对音效
+                AudioPlayer.playEffect("/audio/correct.wav");
                 timer.cancel();
                 messageLabel.setText("Correct! Well done!");
                 messageLabel.setTextFill(Color.GREEN);
@@ -252,6 +257,8 @@ private void drawSector() {
                     }
                 }).start();
             } else {
+                // 播放答错音效
+                AudioPlayer.playEffect("/audio/wrong.wav");
                 if (attempts >= 3) {
                     timer.cancel();
                     messageLabel.setText("The correct answer is: " + String.format("%.2f", correctAnswer));
