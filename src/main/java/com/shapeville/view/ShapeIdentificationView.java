@@ -181,10 +181,18 @@ public class ShapeIdentificationView extends VBox {
         getChildren().add(restartButton);
     }
 
+//    private void prepareNewRoundShapes() {
+//        List<Shape> sourceList = is3DMode ? shapes3D : shapes2D;
+//        currentRoundShapes = new ArrayList<>(sourceList);
+//        Collections.shuffle(currentRoundShapes, random);
+//        currentShapeIndex = 0;
+//    }
     private void prepareNewRoundShapes() {
         List<Shape> sourceList = is3DMode ? shapes3D : shapes2D;
-        currentRoundShapes = new ArrayList<>(sourceList);
-        Collections.shuffle(currentRoundShapes, random);
+        List<Shape> tempList = new ArrayList<>(sourceList);
+        Collections.shuffle(tempList, random);
+        // 只保留前4个题，确保一轮4题且无重复
+        currentRoundShapes = tempList.subList(0, Math.min(4, tempList.size()));
         currentShapeIndex = 0;
     }
 
@@ -220,21 +228,10 @@ public class ShapeIdentificationView extends VBox {
     private void showNextShape() {
         int completed = is3DMode ? completed3DCount : completed2DCount;
 
-        // 如果完成了4题弹窗
-        if (completed >= 4) {
+        // ==每轮只需要判断索引==
+        if (currentShapeIndex >= currentRoundShapes.size()) {
             showCompletionDialog();
             return;
-        }
-
-        // 每4题重新洗牌和归零索引
-        if (completed % 4 == 0) {
-            prepareNewRoundShapes();
-            currentShapeIndex = 0; // <<< 必须归零
-        }
-
-        // 如果 currentShapeIndex 大于等于题库长度，归零
-        if (currentShapeIndex >= currentRoundShapes.size()) {
-            currentShapeIndex = 0;
         }
 
         // 实际出题
@@ -356,7 +353,6 @@ public class ShapeIdentificationView extends VBox {
         // 新增：标签同步隐藏
         if (rotationYLabel != null) rotationYLabel.setVisible(enable);
         if (rotationXLabel != null) rotationXLabel.setVisible(enable);
-
 
     }
 }

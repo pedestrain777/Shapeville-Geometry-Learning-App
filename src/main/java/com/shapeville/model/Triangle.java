@@ -53,7 +53,24 @@ public class Triangle extends Shape2D {
 
     @Override
     public void draw(GraphicsContext gc) {
-        // Not used in new logic
+        gc.setFill(this.getColor());
+
+        double[] xPoints = {
+            this.x,                       // 左下角
+            this.x + this.base,           // 右下角
+            this.x + (this.base / 2)    // 顶部中心
+        };
+        double[] yPoints = {
+            this.y + this.height,       // 左下角
+            this.y + this.height,       // 右下角
+            this.y                      // 顶部中心
+        };
+
+        gc.fillPolygon(xPoints, yPoints, 3);
+
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.strokePolygon(xPoints, yPoints, 3);
     }
 
     public String getFormula() {

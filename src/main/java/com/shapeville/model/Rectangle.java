@@ -47,7 +47,11 @@ public class Rectangle extends Shape2D {
 
     @Override
     public void draw(GraphicsContext gc) {
-        // Not used in new logic
+        gc.setFill(this.getColor());
+        gc.fillRect(this.x, this.y, this.width, this.height);
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(1);
+        gc.strokeRect(this.x, this.y, this.width, this.height);
     }
 
     public String getFormula() {
