@@ -171,8 +171,11 @@ public class CompoundShapeView extends VBox {
                 currentShapes.add(rect1);
                 currentShapes.add(rect2);
         } else if (index == 3) {
-            // 图4：复杂阶梯形（3个矩形） - 创建基本形状
-            // TODO: 添加图4的基本形状创建代码
+            // 图4：由两个矩形组成，上方正方形12x12，下方矩形24x6
+            Rectangle rectTop = new Rectangle(12 * scaleFactor, 12 * scaleFactor); // 上方正方形
+            Rectangle rectBottom = new Rectangle(24 * scaleFactor, 6 * scaleFactor); // 下方长方形
+            currentShapes.add(rectTop);
+            currentShapes.add(rectBottom);
         } else if (index == 4) {
             // 图5：梯形 - 创建基本形状
             // TODO: 添加图5的基本形状创建代码
@@ -335,8 +338,46 @@ public class CompoundShapeView extends VBox {
             gc.strokeLine(rect1X, rect1Y + rect1Height, rect1X, rect1Y); // 左侧竖边
             
         } else if (currentShapeIndex == 3) {
-             // 图4的特殊绘制：统一颜色，只绘制外轮廓
-            // TODO: 添加图4的填充颜色和外轮廓绘制代码
+            // 图4的特殊绘制：统一颜色，只绘制外轮廓
+            gc.setFill(Color.LIGHTBLUE); // 统一设置为浅蓝色
+
+            Rectangle rectTop = (Rectangle) currentShapes.get(0);
+            Rectangle rectBottom = (Rectangle) currentShapes.get(1);
+
+            double x0 = rectBottom.getX();
+            double y0 = rectBottom.getY();
+            double w = 10.0;
+            double h = 10.0;
+
+            // 计算顶点，顺时针
+            double[] xPoints = {
+                x0,                        // 左下
+                x0,                        // 左上
+                x0 + 6 * w,                // 上方正方形左上
+                x0 + 6 * w,                // 上方正方形右上
+                x0 + 18 * w,               // 上方正方形右上
+                x0 + 18 * w,               // 上方正方形右下
+                x0 + 24 * w,               // 右上
+                x0 + 24 * w,               // 右下
+                x0                         // 回到左下
+            };
+            double[] yPoints = {
+                y0 + 6 * h,                // 左下
+                y0,                        // 左上
+                y0,                        // 上方正方形左上
+                y0 - 12 * h,               // 上方正方形右上
+                y0 - 12 * h,               // 上方正方形右上
+                y0,                        // 上方正方形右下
+                y0,                        // 右上
+                y0 + 6 * h,                // 右下
+                y0 + 6 * h                 // 回到左下
+            };
+
+            gc.fillPolygon(xPoints, yPoints, 8);
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(2.0);
+            gc.strokePolygon(xPoints, yPoints, 8);
+
         } else if (currentShapeIndex == 4) {
              // 图5的特殊绘制：统一颜色，只绘制外轮廓
             // TODO: 添加图5的填充颜色和外轮廓绘制代码
@@ -431,8 +472,19 @@ public class CompoundShapeView extends VBox {
             rect2.setPosition(startX + rect1.getWidth(), startY); // 在左侧矩形右侧，顶部对齐
             
         } else if (currentShapeIndex == 3) {
-            // 图4：复杂阶梯形 - 定位基本形状
-            // TODO: 添加图4的基本形状定位代码
+            // 图4：定位
+            double totalWidth = 24 * 10.0;
+            double totalHeight = 12 * 10.0 + 6 * 10.0;
+            double startX = centerX - totalWidth / 2;
+            double startY = centerY - totalHeight / 2;
+
+            // 上方正方形居中
+            Rectangle rectTop = (Rectangle) currentShapes.get(0);
+            rectTop.setPosition(startX + 6 * 10.0, startY);
+
+            // 下方长方形
+            Rectangle rectBottom = (Rectangle) currentShapes.get(1);
+            rectBottom.setPosition(startX, startY + 12 * 10.0);
         } else if (currentShapeIndex == 4) {
             // 图5：梯形 - 定位基本形状
             // TODO: 添加图5的基本形状定位代码
@@ -600,8 +652,68 @@ public class CompoundShapeView extends VBox {
             gc.strokeLine(rect2X + rect2Width + 8, rect1Y + rect1Height, rect2X + rect2Width + 2, rect1Y + rect1Height);
 
         } else if (currentShapeIndex == 3) {
-             // 图4：复杂阶梯形 - 尺寸标注
-            // TODO: 添加图4的尺寸标注代码
+            // 图4：尺寸标注
+            Rectangle rectTop = (Rectangle) currentShapes.get(0);
+            Rectangle rectBottom = (Rectangle) currentShapes.get(1);
+
+            double x0 = rectBottom.getX();
+            double y0 = rectBottom.getY();
+            double x1 = rectBottom.getX() + rectBottom.getWidth();
+            double y1 = rectBottom.getY();
+            double x2 = rectBottom.getX() + rectBottom.getWidth();
+            double y2 = rectBottom.getY() + rectBottom.getHeight();
+            double x3 = rectBottom.getX();
+            double y3 = rectBottom.getY() + rectBottom.getHeight();
+            double x4 = rectTop.getX();
+            double y4 = rectTop.getY();
+            double x5 = rectTop.getX() + rectTop.getWidth();
+            double y5 = rectTop.getY();
+            double x6 = rectTop.getX() + rectTop.getWidth();
+            double y6 = rectTop.getY() + rectTop.getHeight();
+            double x7 = rectTop.getX();
+            double y7 = rectTop.getY() + rectTop.getHeight();
+
+            // 顶部宽 12m
+            gc.fillText("12 m", x4 + rectTop.getWidth() / 2 - 15, y4 - 10);
+            gc.strokeLine(x4, y4 - 5, x5, y4 - 5);
+            gc.strokeLine(x4, y4 - 2, x4, y4 - 8);
+            gc.strokeLine(x5, y4 - 2, x5, y4 - 8);
+
+            // 左侧高 12m
+            gc.fillText("12 m", x4 - 30, y4 + rectTop.getHeight() / 2);
+            gc.strokeLine(x4 - 5, y4, x4 - 5, y7);
+            gc.strokeLine(x4 - 2, y4, x4 - 8, y4);
+            gc.strokeLine(x4 - 2, y7, x4 - 8, y7);
+
+            // 右侧高 18m
+            gc.fillText("18 m", x6 + 10, y5 + (y2 - y5) / 2);
+            gc.strokeLine(x6 + 5, y5, x6 + 5, y2);
+            gc.strokeLine(x6 + 2, y5, x6 + 8, y5);
+            gc.strokeLine(x6 + 2, y2, x6 + 8, y2);
+
+            // 底部宽 24m
+            gc.fillText("24 m", x0 + rectBottom.getWidth() / 2 - 15, y2 + 35);
+            gc.strokeLine(x0, y2 + 20, x2, y2 + 20);
+            gc.strokeLine(x0, y2 + 17, x0, y2 + 23);
+            gc.strokeLine(x2, y2 + 17, x2, y2 + 23);
+
+            // 左下宽 2m
+            gc.fillText("2 m", x0 + 10, y3 + 15);
+            gc.strokeLine(x0, y3 + 5, x4, y3 + 5);
+            gc.strokeLine(x0, y3 + 2, x0, y3 + 8);
+            gc.strokeLine(x4, y3 + 2, x4, y3 + 8);
+
+            // 右下宽 10m
+            gc.fillText("10 m", x5 + 10, y2 + 15);
+            gc.strokeLine(x5, y2 + 5, x2, y2 + 5);
+            gc.strokeLine(x5, y2 + 2, x5, y2 + 8);
+            gc.strokeLine(x2, y2 + 2, x2, y2 + 8);
+
+            // 下方高 6m
+            gc.fillText("6 m", x1 + 10, y1 + rectBottom.getHeight() / 2);
+            gc.strokeLine(x1 + 5, y1, x1 + 5, y2);
+            gc.strokeLine(x1 + 2, y1, x1 + 8, y1);
+            gc.strokeLine(x1 + 2, y2, x1 + 8, y2);
         } else if (currentShapeIndex == 4) {
              // 图5：梯形 - 尺寸标注
             // TODO: 添加图5的尺寸标注代码
