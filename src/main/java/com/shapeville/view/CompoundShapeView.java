@@ -177,8 +177,41 @@ public class CompoundShapeView extends VBox {
             currentShapes.add(rectTop);
             currentShapes.add(rectBottom);
         } else if (index == 4) {
-            // 图5：梯形 - 创建基本形状
-            // TODO: 添加图5的基本形状创建代码
+            // 图5：直角梯形 - 创建基本形状（用点集描述）
+            // 下底4cm，左边6cm，右边2cm，上底斜边5cm
+            // 用自定义Shape2D实现
+            currentShapes.clear();
+            currentShapes.add(new Shape2D("rightTrapezium", javafx.scene.paint.Color.LIGHTBLUE, 4 * 10.0, 6 * 10.0) {
+                @Override
+                public double calculateArea() {
+                    return 0.5 * (4 + 5) * 6; // 梯形面积公式
+                }
+                @Override
+                public void draw(javafx.scene.canvas.GraphicsContext gc) {
+                    double x = this.x;
+                    double y = this.y;
+                    double scale = 10.0;
+                    double[] xPoints = {x, x, x + 4*scale, x + 4*scale};
+                    double[] yPoints = {y, y - 6*scale, y - 2*scale, y};
+                    gc.setFill(this.getColor());
+                    gc.fillPolygon(xPoints, yPoints, 4);
+                    gc.setStroke(javafx.scene.paint.Color.BLACK);
+                    gc.setLineWidth(2.0);
+                    gc.strokePolygon(xPoints, yPoints, 4);
+                }
+                @Override
+                public Shape2D copy() {
+                    Shape2D that = this;
+                    return new Shape2D("rightTrapezium", that.getColor(), 4 * 10.0, 6 * 10.0) {
+                        @Override
+                        public double calculateArea() { return that.calculateArea(); }
+                        @Override
+                        public void draw(javafx.scene.canvas.GraphicsContext gc) { that.draw(gc); }
+                        @Override
+                        public Shape2D copy() { return this; }
+                    };
+                }
+            });
         } else if (index == 5) {
             // 图6：梯形和直角三角形 - 创建基本形状
             // TODO: 添加图6的基本形状创建代码
@@ -379,8 +412,9 @@ public class CompoundShapeView extends VBox {
             gc.strokePolygon(xPoints, yPoints, 8);
 
         } else if (currentShapeIndex == 4) {
-             // 图5的特殊绘制：统一颜色，只绘制外轮廓
-            // TODO: 添加图5的填充颜色和外轮廓绘制代码
+            // 图5的特殊绘制：直角梯形，填充浅蓝色，仅绘制外轮廓
+            Shape2D trap = currentShapes.get(0);
+            trap.draw(gc);
         } else if (currentShapeIndex == 5) {
              // 图6的特殊绘制：统一颜色，只绘制外轮廓
             // TODO: 添加图6的填充颜色和外轮廓绘制代码
@@ -486,8 +520,13 @@ public class CompoundShapeView extends VBox {
             Rectangle rectBottom = (Rectangle) currentShapes.get(1);
             rectBottom.setPosition(startX, startY + 12 * 10.0);
         } else if (currentShapeIndex == 4) {
-            // 图5：梯形 - 定位基本形状
-            // TODO: 添加图5的基本形状定位代码
+            // 图5：直角梯形 - 定位基本形状
+            Shape2D trap = currentShapes.get(0);
+            double width = 4 * 10.0;
+            double height = 6 * 10.0;
+            double startX = centerX - width / 2;
+            double startY = centerY + height / 2;
+            trap.setPosition(startX, startY);
         } else if (currentShapeIndex == 5) {
             // 图6：梯形和直角三角形 - 定位基本形状
             // TODO: 添加图6的基本形状定位代码
@@ -715,8 +754,36 @@ public class CompoundShapeView extends VBox {
             gc.strokeLine(x1 + 2, y1, x1 + 8, y1);
             gc.strokeLine(x1 + 2, y2, x1 + 8, y2);
         } else if (currentShapeIndex == 4) {
-             // 图5：梯形 - 尺寸标注
-            // TODO: 添加图5的尺寸标注代码
+            // 图5：直角梯形 - 尺寸标注
+            Shape2D trap = currentShapes.get(0);
+            double x = trap.getX();
+            double y = trap.getY();
+            double scale = 10.0;
+            // 直接在此处计算顶点
+            double[] xPoints = {x, x, x + 4*scale, x + 4*scale};
+            double[] yPoints = {y, y - 6*scale, y - 2*scale, y};
+            // 下底 4cm
+            gc.fillText("4 cm", x + 2*scale - 10, y + 20);
+            gc.strokeLine(x, y + 10, x + 4*scale, y + 10);
+            gc.strokeLine(x, y + 7, x, y + 13);
+            gc.strokeLine(x + 4*scale, y + 7, x + 4*scale, y + 13);
+            // 左边 6cm
+            gc.fillText("6 cm", x - 35, y - 3*scale);
+            gc.strokeLine(x - 10, y, x - 10, y - 6*scale);
+            gc.strokeLine(x - 7, y, x - 13, y);
+            gc.strokeLine(x - 7, y - 6*scale, x - 13, y - 6*scale);
+            // 右边 2cm
+            gc.fillText("2 cm", x + 4*scale + 10, y - scale);
+            gc.strokeLine(x + 4*scale + 5, y, x + 4*scale + 5, y - 2*scale);
+            gc.strokeLine(x + 4*scale + 2, y, x + 4*scale + 8, y);
+            gc.strokeLine(x + 4*scale + 2, y - 2*scale, x + 4*scale + 8, y - 2*scale);
+            // 上底斜边 5cm
+            double midX = (x + x + 4*scale) / 2;
+            double midY = (y - 6*scale + y - 2*scale) / 2;
+            gc.fillText("5 cm", midX - 10, midY - 10);
+            gc.strokeLine(x, y - 6*scale - 5, x + 4*scale, y - 2*scale - 5);
+            gc.strokeLine(x, y - 6*scale - 2, x, y - 6*scale - 8);
+            gc.strokeLine(x + 4*scale, y - 2*scale - 2, x + 4*scale, y - 2*scale - 8);
         } else if (currentShapeIndex == 5) {
              // 图6：梯形和直角三角形 - 尺寸标注
             // TODO: 添加图6的尺寸标注代码
