@@ -32,7 +32,7 @@ public class CompoundShapeView extends VBox {
     private int attempts;
     private Timer timer;
     private int timeRemaining;
-    private int currentShapeIndex;
+    private int currentShapeIndex = -1;
     private Random random;
     private Set<Integer> completedShapes = new HashSet<>();
     private ComboBox<String> shapeSelector;
@@ -62,16 +62,17 @@ public class CompoundShapeView extends VBox {
         }
         shapeSelector.setPromptText("Select a compound shape");
         shapeSelector.setPrefWidth(200);
-        selectorBox.getChildren().addAll(new Label("Select shape:"), shapeSelector);
-        
         shapeSelector.setOnAction(e -> {
             if (shapeSelector.getValue() != null) {
                 currentShapeIndex = shapeSelector.getSelectionModel().getSelectedIndex();
                 generateCompoundShape(currentShapeIndex);
+                // 在选择新图形时清除消息
+                messageLabel.setText("");
             }
         });
+        selectorBox.getChildren().addAll(new Label("Select shape:"), shapeSelector);
 
-        // Canvas for shape drawing
+        // 恢复Canvas
         canvas = new Canvas(500, 400);
         gc = canvas.getGraphicsContext2D();
         // 初始提示
@@ -89,6 +90,8 @@ public class CompoundShapeView extends VBox {
         answerField = new TextField();
         answerField.setPromptText("Enter total area");
         answerField.setPrefWidth(100);
+        // 根据currentShapeIndex判断是否禁用输入框
+        answerField.setDisable(currentShapeIndex == -1);
         Button submitButton = new Button("Submit");
         submitButton.setOnAction(e -> checkAnswer());
         inputBox.getChildren().addAll(new Label("Total Area:"), answerField, submitButton);
@@ -104,7 +107,7 @@ public class CompoundShapeView extends VBox {
         getChildren().addAll(
                 titleLabel,
                 selectorBox,
-                canvas,
+                canvas, // 恢复显示Canvas
                 timerLabel,
                 inputBox,
                 messageLabel,
@@ -113,6 +116,12 @@ public class CompoundShapeView extends VBox {
         // 更新进度显示
         shapeSelector.valueProperty().addListener((obs, oldVal, newVal) -> {
             updateProgressLabel();
+        });
+        
+        // 监听currentShapeIndex，控制输入框的禁用状态
+        shapeSelector.getSelectionModel().selectedIndexProperty().addListener((obs, oldVal, newVal) -> {
+            currentShapeIndex = newVal.intValue();
+            answerField.setDisable(currentShapeIndex == -1);
         });
     }
     
@@ -136,131 +145,53 @@ public class CompoundShapeView extends VBox {
 
     private void generateCompoundShape(int index) {
         currentShapes.clear();
-        
-        // 放大所有尺寸至原来的两倍
-        switch (index) {
-            case 0 -> {
-                // 形状1: L形（矩形+矩形）
-                double width1 = 28;  // 原来的14 * 2
-                double height1 = 28; // 原来的14 * 2
-                double width2 = 28;  // 原来的14 * 2
-                double height2 = 10; // 原来的5 * 2
-                
-                Rectangle rect1 = new Rectangle(width1, height1);
-                Rectangle rect2 = new Rectangle(width2, height2);
-                
-                currentShapes.add(rect1);
-                currentShapes.add(rect2);
-            }
-            case 1 -> {
-                // 形状2: T形（矩形+矩形）
-                double width1 = 42;  // 原来的21 * 2
-                double height1 = 20; // 原来的10 * 2
-                double width2 = 22;  // 原来的11 * 2
-                double height2 = 22; // 原来的11 * 2
-                
-                Rectangle rect1 = new Rectangle(width1, height1);
-                Rectangle rect2 = new Rectangle(width2, height2);
-                
-                currentShapes.add(rect1);
-                currentShapes.add(rect2);
-            }
-            case 2 -> {
-                // 形状3: 凹形（矩形+2个小矩形）
-                double width1 = 36;  // 原来的18 * 2
-                double height1 = 32; // 原来的16 * 2
-                double width2 = 32;  // 原来的16 * 2
-                double height2 = 38; // 原来的19 * 2
-                
-                Rectangle rect1 = new Rectangle(width1, height1);
-                Rectangle rect2 = new Rectangle(width2, height2);
-                
-                currentShapes.add(rect1);
-                currentShapes.add(rect2);
-            }
-            case 3 -> {
-                // 形状4: 复杂阶梯形（3个矩形）
-                double width1 = 24;  // 原来的12 * 2
-                double height1 = 24; // 原来的12 * 2
-                double width2 = 20;  // 原来的10 * 2
-                double height2 = 4;  // 原来的2 * 2
-                double width3 = 48;  // 原来的24 * 2
-                double height3 = 12; // 原来的6 * 2
-                
-                Rectangle rect1 = new Rectangle(width1, height1);
-                Rectangle rect2 = new Rectangle(width2, height2);
-                Rectangle rect3 = new Rectangle(width3, height3);
-                
-                currentShapes.add(rect1);
-                currentShapes.add(rect2);
-                currentShapes.add(rect3);
-            }
-            case 4 -> {
-                // 形状5: 三角形
-                double triangleBase = 32;  // 原来的16 * 2
-                double height = 8;         // 原来的4 * 2
-                double hypotenuse = 8;     // 原来的4 * 2
-                
-                Triangle triangle = new Triangle(triangleBase, height);
-                Rectangle rect = new Rectangle(triangleBase, hypotenuse);
-                
-                currentShapes.add(triangle);
+        // 根据图片中的图形结构来创建基本形状
+        double scaleFactor = 10.0; // 放大系数
+        if (index == 0) {
+            // 图1：矩形+三角形
+            Rectangle rect = new Rectangle(14 * scaleFactor, 14 * scaleFactor); // 图片中的矩形尺寸
+            // 根据图片，三角形的垂直底边与矩形右侧等高 (14*scaleFactor)，水平高（为了视觉还原5cm斜边）
+            // 为了让斜边大约是 5*scaleFactor，根据勾股定理估算水平高：sqrt((5*s)^2 - (14*s/2)^2) = s * sqrt(25 - 49)，还是虚数
+            // 按照视觉比例，估算三角形的水平高大约是垂直高的一半或者更少。暂定水平高为 5 * scaleFactor
+            Triangle tri = new Triangle(14 * scaleFactor, 5 * scaleFactor); // 底边(垂直), 高(水平)
                 currentShapes.add(rect);
-            }
-            case 5 -> {
-                // 形状6: 梯形和直角三角形
-                double width = 40;      // 原来的20 * 2
-                double height = 22;     // 原来的11 * 2
-                double topWidth = 18;   // 原来的9 * 2
-                double diagonal = 28;   // 原来的14 * 2
-                
-                Trapezium trapezium = new Trapezium(topWidth, width, height);
-                currentShapes.add(trapezium);
-            }
-            case 6 -> {
-                // 形状7: 复合形状（五边形）
-                double rectBase = 28;   // 原来的14 * 2
-                double height1 = 32;    // 原来的16 * 2
-                double height2 = 24;    // 原来的12 * 2
-                double width = 10;      // 原来的5 * 2
-                
-                Rectangle rect = new Rectangle(rectBase, height1);
-                Triangle triangle = new Triangle(rectBase, height2);
-                
-                currentShapes.add(rect);
-                currentShapes.add(triangle);
-            }
-            case 7 -> {
-                // 形状8: 复杂矩形组合
-                double width1 = 72;     // 原来的36 * 2
-                double height1 = 72;    // 原来的36 * 2
-                double width2 = 120;    // 原来的60 * 2
-                double height2 = 72;    // 原来的36 * 2
-                
-                Rectangle rect1 = new Rectangle(width1, height1);
-                Rectangle rect2 = new Rectangle(width2, height2);
-                
+            currentShapes.add(tri);
+        } else if (index == 1) {
+            // 图2：两个矩形拼L形
+            // 根据图片，左上角矩形尺寸 11x11，下方矩形尺寸 20x10
+            Rectangle rect1 = new Rectangle(11 * scaleFactor, 11 * scaleFactor); // 左上角矩形 (宽x高)
+            Rectangle rect2 = new Rectangle(20 * scaleFactor, 10 * scaleFactor); // 下方矩形 (宽x高)
                 currentShapes.add(rect1);
                 currentShapes.add(rect2);
-            }
-            case 8 -> {
-                // 形状9: 楼梯形状
-                double width1 = 20;     // 原来的10 * 2
-                double height1 = 22;    // 原来的11 * 2
-                double width2 = 16;     // 原来的8 * 2
-                double height2 = 16;    // 原来的8 * 2
-                
-                Rectangle rect1 = new Rectangle(width1, height1);
-                Rectangle rect2 = new Rectangle(width2, height2);
-                
+        } else if (index == 2) {
+            // 图3：凹形（矩形+小矩形） - 创建基本形状
+            // 根据图片，左侧矩形尺寸 18x19，右侧上方矩形尺寸 16x16
+            Rectangle rect1 = new Rectangle(18 * scaleFactor, 19 * scaleFactor); // 左侧矩形 (宽x高)
+            Rectangle rect2 = new Rectangle(16 * scaleFactor, 16 * scaleFactor); // 右侧上方矩形 (宽x高)
                 currentShapes.add(rect1);
                 currentShapes.add(rect2);
-            }
-            default -> {
-                // 默认形状：简单矩形
-                Rectangle defaultShape = new Rectangle(20, 20);  // 原来的10 * 2
-                currentShapes.add(defaultShape);
-            }
+        } else if (index == 3) {
+            // 图4：复杂阶梯形（3个矩形） - 创建基本形状
+            // TODO: 添加图4的基本形状创建代码
+        } else if (index == 4) {
+            // 图5：梯形 - 创建基本形状
+            // TODO: 添加图5的基本形状创建代码
+        } else if (index == 5) {
+            // 图6：梯形和直角三角形 - 创建基本形状
+            // TODO: 添加图6的基本形状创建代码
+        } else if (index == 6) {
+            // 图7：复合形状（五边形，矩形+三角形） - 创建基本形状
+            // TODO: 添加图7的基本形状创建代码
+        } else if (index == 7) {
+            // 图8：复杂矩形组合（T形） - 创建基本形状
+            // TODO: 添加图8的基本形状创建代码
+        } else if (index == 8) {
+            // 图9：楼梯形状（两个矩形） - 创建基本形状
+            // TODO: 添加图9的基本形状创建代码
+        }
+        else {
+            // 对于其他图形，可以暂时添加一个默认形状或者留空
+            currentShapes.add(new Rectangle(50, 50));
         }
 
         drawCompoundShape();
@@ -270,270 +201,424 @@ public class CompoundShapeView extends VBox {
     private void drawCompoundShape() {
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
-        // 没有形状时直接返回
         if (currentShapes.isEmpty()) {
             return;
         }
 
-        // 计算每个形状的位置，根据不同的复合形状类型
         positionShapes();
-
-        // 绘制所有形状，使用不同的颜色来区分不同的部分
-        Color[] colors = {
-            Color.LIGHTBLUE, Color.LIGHTGREEN, Color.LIGHTSALMON, 
-            Color.LIGHTCORAL, Color.LIGHTSTEELBLUE, Color.LIGHTYELLOW
-        };
         
-        for (int i = 0; i < currentShapes.size(); i++) {
-            Shape2D shape = currentShapes.get(i);
-            // 设置不同的填充颜色
-            gc.setFill(colors[i % colors.length]);
-            shape.draw(gc);
+        if (currentShapeIndex == 0) {
+            // 图1的特殊绘制：统一颜色，只绘制外轮廓
+            gc.setFill(Color.LIGHTBLUE); // 修改为浅蓝色
             
-            // 绘制边框
+            Rectangle rect = (Rectangle) currentShapes.get(0);
+            Triangle tri = (Triangle) currentShapes.get(1);
+            
+            double rectX = rect.getX();
+            double rectY = rect.getY();
+            double rectWidth = rect.getWidth();
+            double rectHeight = rect.getHeight();
+            
+            double triX = tri.getX();
+            double triY = tri.getY();
+            double triBase = tri.getBase(); // 垂直高度
+            double triHeight = tri.getHeight(); // 水平长度
+            
+            // 填充整个复合图形
+            List<Double> xPointsList = new ArrayList<>();
+            List<Double> yPointsList = new ArrayList<>();
+
+            // 添加矩形左上、左下、右下顶点
+            xPointsList.add(rectX);
+            yPointsList.add(rectY);
+            xPointsList.add(rectX);
+            yPointsList.add(rectY + rectHeight);
+            xPointsList.add(rectX + rectWidth);
+            yPointsList.add(rectY + rectHeight);
+            
+            // 添加三角形右下顶点，右侧尖点，右上顶点
+            xPointsList.add(triX);
+            yPointsList.add(triY + triBase);
+            xPointsList.add(triX + triHeight);
+            yPointsList.add(triY + triBase/2);
+             xPointsList.add(triX);
+            yPointsList.add(triY);
+
+             // 排序顶点 (简单排序，可能需要更复杂的几何排序方法)
+            double[] sortedX = xPointsList.stream().mapToDouble(Double::doubleValue).toArray();
+            double[] sortedY = yPointsList.stream().mapToDouble(Double::doubleValue).toArray();
+
+             // 简单的填充多边形
+             gc.fillPolygon(sortedX, sortedY, sortedX.length);
+
+            // 绘制外轮廓
             gc.setStroke(Color.BLACK);
             gc.setLineWidth(2.0);
-            if (shape instanceof Rectangle) {
-                Rectangle rect = (Rectangle) shape;
-                gc.strokeRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
-            } else if (shape instanceof Triangle) {
-                Triangle tri = (Triangle) shape;
-                double[] xPoints = {tri.getX(), tri.getX() + tri.getWidth(), tri.getX() + tri.getWidth()/2};
-                double[] yPoints = {tri.getY() + tri.getHeight(), tri.getY() + tri.getHeight(), tri.getY()};
-                gc.strokePolygon(xPoints, yPoints, 3);
-            } else if (shape instanceof Trapezium) {
-                Trapezium trap = (Trapezium) shape;
-                double offset = (trap.getBottomWidth() - trap.getTopWidth()) / 2;
-                double[] xPoints = {
-                    trap.getX() + offset, trap.getX() + offset + trap.getTopWidth(), 
-                    trap.getX() + trap.getBottomWidth(), trap.getX()
-                };
-                double[] yPoints = {
-                    trap.getY(), trap.getY(), 
-                    trap.getY() + trap.getHeight(), trap.getY() + trap.getHeight()
-                };
-                gc.strokePolygon(xPoints, yPoints, 4);
+            
+            // 绘制矩形左、下、上边
+            gc.strokeLine(rectX, rectY, rectX, rectY + rectHeight); // 左边
+            gc.strokeLine(rectX, rectY + rectHeight, rectX + rectWidth, rectY + rectHeight); // 下边
+            gc.strokeLine(rectX, rectY, rectX + rectWidth, rectY); // 上边
+
+            // 绘制连接三角形的边 (矩形右下到三角形右下，三角形右下到尖点，尖点到三角形右上，三角形右上到矩形右上)
+            gc.strokeLine(rectX + rectWidth, rectY + rectHeight, triX, triY + triBase); // 矩形右下到三角形右下
+            gc.strokeLine(triX, triY + triBase, triX + triHeight, triY + triBase/2); // 三角形右下到尖点
+            gc.strokeLine(triX + triHeight, triY + triBase/2, triX, triY); // 尖点到三角形右上
+            gc.strokeLine(triX, triY, rectX + rectWidth, rectY); // 三角形右上到矩形右上
+
+        } else if (currentShapeIndex == 1) {
+             // 图2的特殊绘制：统一颜色，只绘制外轮廓
+            gc.setFill(Color.LIGHTGREEN); // 统一设置为浅绿色
+
+            Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左上角矩形
+            Rectangle rect2 = (Rectangle) currentShapes.get(1); // 下方矩形
+
+            double rect1X = rect1.getX();
+            double rect1Y = rect1.getY();
+            double rect1Width = rect1.getWidth();
+            double rect1Height = rect1.getHeight();
+
+            double rect2X = rect2.getX();
+            double rect2Y = rect2.getY();
+            double rect2Width = rect2.getWidth();
+            double rect2Height = rect2.getHeight();
+
+            // 填充整个复合图形 (L形)
+            double[] xPointsFill = {rect1X, rect1X + rect1Width, rect1X + rect1Width, rect2X + rect2Width, rect2X + rect2Width, rect2X};
+            double[] yPointsFill = {rect1Y, rect1Y, rect1Y + rect1Height, rect1Y + rect1Height, rect2Y + rect2Height, rect2Y + rect2Height};
+            gc.fillPolygon(xPointsFill, yPointsFill, 6);
+            
+            // 绘制外轮廓
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(2.0);
+
+            // 绘制外围的六条边
+            gc.strokeLine(rect1X, rect1Y, rect1X + rect1Width, rect1Y); // 左上横边
+            gc.strokeLine(rect1X + rect1Width, rect1Y, rect1X + rect1Width, rect1Y + rect1Height); // 右上竖边
+            gc.strokeLine(rect1X + rect1Width, rect1Y + rect1Height, rect2X + rect2Width, rect1Y + rect1Height); // 连接两矩形的横边
+            gc.strokeLine(rect2X + rect2Width, rect1Y + rect1Height, rect2X + rect2Width, rect2Y + rect2Height); // 右下竖边
+            gc.strokeLine(rect2X + rect2Width, rect2Y + rect2Height, rect2X, rect2Y + rect2Height); // 下横边
+            gc.strokeLine(rect2X, rect2Y + rect2Height, rect2X, rect1Y); // 左侧总竖边
+
+        } else if (currentShapeIndex == 2) {
+            // 图3的特殊绘制：统一颜色，只绘制外轮廓
+            gc.setFill(Color.LIGHTBLUE); // 修改为浅蓝色
+            
+            Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左侧矩形
+            Rectangle rect2 = (Rectangle) currentShapes.get(1); // 右侧上方矩形
+            
+            double rect1X = rect1.getX();
+            double rect1Y = rect1.getY();
+            double rect1Width = rect1.getWidth();
+            double rect1Height = rect1.getHeight();
+            
+            double rect2X = rect2.getX();
+            double rect2Y = rect2.getY();
+            double rect2Width = rect2.getWidth();
+            double rect2Height = rect2.getHeight();
+            
+            // 填充整个复合图形
+            double[] xPointsFill = {rect1X, rect1X + rect1Width, rect1X + rect1Width, rect2X + rect2Width, rect2X + rect2Width, rect1X};
+            double[] yPointsFill = {rect1Y, rect1Y, rect1Y + (rect1Height - rect2Height), rect1Y + (rect1Height - rect2Height), rect1Y + rect1Height, rect1Y + rect1Height};
+            gc.fillPolygon(xPointsFill, yPointsFill, 6);
+
+            // 绘制外轮廓
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(2.0);
+            
+            // 绘制外围六条边
+            gc.strokeLine(rect1X, rect1Y, rect1X + rect1Width, rect1Y); // 左上横边
+            gc.strokeLine(rect1X + rect1Width, rect1Y, rect1X + rect1Width, rect1Y + (rect1Height - rect2Height)); // 右侧上部竖边
+            gc.strokeLine(rect1X + rect1Width, rect1Y + (rect1Height - rect2Height), rect2X + rect2Width, rect1Y + (rect1Height - rect2Height)); // 右侧连接横边
+            gc.strokeLine(rect2X + rect2Width, rect1Y + (rect1Height - rect2Height), rect2X + rect2Width, rect1Y + rect1Height); // 右下竖边
+            gc.strokeLine(rect2X + rect2Width, rect1Y + rect1Height, rect1X, rect1Y + rect1Height); // 下横边
+            gc.strokeLine(rect1X, rect1Y + rect1Height, rect1X, rect1Y); // 左侧竖边
+            
+        } else if (currentShapeIndex == 3) {
+             // 图4的特殊绘制：统一颜色，只绘制外轮廓
+            // TODO: 添加图4的填充颜色和外轮廓绘制代码
+        } else if (currentShapeIndex == 4) {
+             // 图5的特殊绘制：统一颜色，只绘制外轮廓
+            // TODO: 添加图5的填充颜色和外轮廓绘制代码
+        } else if (currentShapeIndex == 5) {
+             // 图6的特殊绘制：统一颜色，只绘制外轮廓
+            // TODO: 添加图6的填充颜色和外轮廓绘制代码
+        } else if (currentShapeIndex == 6) {
+             // 图7的特殊绘制：统一颜色，只绘制外轮廓
+            // TODO: 添加图7的填充颜色和外轮廓绘制代码
+        } else if (currentShapeIndex == 7) {
+             // 图8的特殊绘制：统一颜色，只绘制外轮廓
+            // TODO: 添加图8的填充颜色和外轮廓绘制代码
+        } else if (currentShapeIndex == 8) {
+             // 图9的特殊绘制：统一颜色，只绘制外轮廓
+            // TODO: 添加图9的填充颜色和外轮廓绘制代码
+        }
+        else {
+            // 其他图形的通用绘制逻辑（作为未实现图形的默认显示）
+            for (int i = 0; i < currentShapes.size(); i++) {
+                Shape2D shape = currentShapes.get(i);
+                // gc.setFill(colors[i % colors.length]); // 通用颜色，可根据需要调整
+                gc.setFill(Color.GRAY); // 暂时用灰色区分未实现的图形
+                shape.draw(gc); // 使用Shape自带的draw方法进行填充和边框绘制
             }
         }
 
-        // 添加尺寸标注
         addDimensionLabels();
     }
     
     private void positionShapes() {
-        // 基本位置
         double centerX = canvas.getWidth() / 2;
         double centerY = canvas.getHeight() / 2;
         
-        switch (currentShapeIndex) {
-            case 0 -> {
-                // L形：第一个矩形作为L的底部，第二个矩形作为L的右侧竖直部分
-                Rectangle rect1 = (Rectangle) currentShapes.get(0);
-                Rectangle rect2 = (Rectangle) currentShapes.get(1);
-                
-                double startX = centerX - rect1.getWidth()/2;
-                double startY = centerY - rect1.getHeight()/2;
-                
+        if (currentShapeIndex == 0) {
+            // 图1：矩形+三角形
+            Rectangle rect = (Rectangle) currentShapes.get(0);
+            Triangle tri = (Triangle) currentShapes.get(1);
+            
+            // 计算整体的宽度和高度
+            double totalWidth = rect.getWidth() + tri.getHeight(); 
+            double totalHeight = rect.getHeight();
+            
+            // 计算整体起始位置，使其居中
+            double startX = centerX - totalWidth / 2;
+            double startY = centerY - totalHeight / 2;
+            
+            // 设置矩形位置
+            rect.setPosition(startX, startY);
+            
+            // 设置三角形位置，使其垂直底边与矩形右侧对齐，且垂直居中
+            tri.setPosition(startX + rect.getWidth(), startY + rect.getHeight()/2 - tri.getBase()/2);
+            
+        } else if (currentShapeIndex == 1) {
+            // 图2：两个矩形拼L形
+            Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左上角矩形
+            Rectangle rect2 = (Rectangle) currentShapes.get(1); // 下方矩形
+            
+            // 根据图片结构，下方矩形宽度 20，高度 10。左上角矩形宽度 11，高度 11。总高度 21。
+            // 整体宽度 20，整体高度 21
+            double totalWidth = 20 * 10.0;
+            double totalHeight = (11 + 10) * 10.0; // 11(左上高)+10(下方高)
+            
+            // 计算整体起始位置，使其居中
+            double startX = centerX - totalWidth / 2;
+            double startY = centerY - totalHeight / 2;
+            
+            // 设置下方矩形位置 (左下角)
+            rect2.setPosition(startX, startY + 11 * 10.0); // 在左上角矩形下方
+            
+            // 设置左上角矩形位置 (左上角)
                 rect1.setPosition(startX, startY);
-                rect2.setPosition(startX + rect1.getWidth() - rect2.getWidth(), 
-                                 startY - rect2.getHeight());
-            }
-            case 1 -> {
-                // T形：第一个矩形作为T的横线，第二个矩形作为T的竖线
-                Rectangle rect1 = (Rectangle) currentShapes.get(0);
-                Rectangle rect2 = (Rectangle) currentShapes.get(1);
-                
-                double startX = centerX - rect1.getWidth()/2;
-                double startY = centerY - rect2.getHeight()/2;
-                
+            
+        } else if (currentShapeIndex == 2) {
+            // 图3：凹形 - 定位基本形状
+            Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左侧矩形
+            Rectangle rect2 = (Rectangle) currentShapes.get(1); // 右侧上方矩形
+            
+            // 根据图片结构，左侧矩形宽18高19，右侧矩形宽16高16
+            // 整体宽度为 18 + 16 = 34
+            // 整体高度为 19
+            double totalWidth = (18 + 16) * 10.0;
+            double totalHeight = 19 * 10.0;
+            
+            // 计算整体起始位置，使其居中
+            double startX = centerX - totalWidth / 2;
+            double startY = centerY - totalHeight / 2;
+            
+            // 设置左侧矩形位置 (左上角)
                 rect1.setPosition(startX, startY);
-                rect2.setPosition(startX + (rect1.getWidth() - rect2.getWidth())/2, 
-                                 startY - rect2.getHeight());
-            }
-            case 2 -> {
-                // 凹形：两个矩形合并成一个凹形
-                Rectangle rect1 = (Rectangle) currentShapes.get(0);
-                Rectangle rect2 = (Rectangle) currentShapes.get(1);
-                
-                double startX = centerX - rect1.getWidth()/2;
-                double startY = centerY - (rect1.getHeight() + rect2.getHeight())/2;
-                
-                rect1.setPosition(startX, startY);
-                rect2.setPosition(startX + (rect1.getWidth() - rect2.getWidth())/2, 
-                                 startY + rect1.getHeight());
-            }
-            case 3 -> {
-                // 复杂阶梯形：三个矩形组合
-                Rectangle rect1 = (Rectangle) currentShapes.get(0);
-                Rectangle rect2 = (Rectangle) currentShapes.get(1);
-                Rectangle rect3 = (Rectangle) currentShapes.get(2);
-                
-                double startX = centerX - rect3.getWidth()/2;
-                double startY = centerY - (rect1.getHeight() + rect3.getHeight())/2;
-                
-                rect1.setPosition(startX, startY);
-                rect2.setPosition(startX + rect1.getWidth(), startY);
-                rect3.setPosition(startX, startY + rect1.getHeight());
-            }
-            case 4 -> {
-                // 三角形和矩形
-                Triangle triangle = (Triangle) currentShapes.get(0);
-                Rectangle rect = (Rectangle) currentShapes.get(1);
-                
-                double startX = centerX - triangle.getWidth()/2;
-                double startY = centerY - (triangle.getHeight() + rect.getHeight())/2;
-                
-                triangle.setPosition(startX, startY);
-                rect.setPosition(startX, startY + triangle.getHeight());
-            }
-            case 5 -> {
-                // 梯形
-                Trapezium trapezium = (Trapezium) currentShapes.get(0);
-                trapezium.setPosition(centerX - trapezium.getWidth()/2, centerY - trapezium.getHeight()/2);
-            }
-            case 6 -> {
-                // 五边形（矩形和三角形）
-                Rectangle rect = (Rectangle) currentShapes.get(0);
-                Triangle triangle = (Triangle) currentShapes.get(1);
-                
-                double startX = centerX - rect.getWidth()/2;
-                double startY = centerY - (rect.getHeight() + triangle.getHeight())/2;
-                
-                rect.setPosition(startX, startY + triangle.getHeight());
-                triangle.setPosition(startX, startY);
-            }
-            case 7 -> {
-                // 复杂矩形组合
-                Rectangle rect1 = (Rectangle) currentShapes.get(0);
-                Rectangle rect2 = (Rectangle) currentShapes.get(1);
-                
-                double startX = centerX - rect2.getWidth()/2;
-                double startY = centerY - (rect1.getHeight() + rect2.getHeight())/2;
-                
-                rect1.setPosition(startX, startY);
-                rect2.setPosition(startX, startY + rect1.getHeight());
-            }
-            case 8 -> {
-                // 楼梯形状
-                Rectangle rect1 = (Rectangle) currentShapes.get(0);
-                Rectangle rect2 = (Rectangle) currentShapes.get(1);
-                
-                double startX = centerX - rect1.getWidth()/2;
-                double startY = centerY - (rect1.getHeight() + rect2.getHeight()/2)/2;
-                
-                rect1.setPosition(startX, startY);
-                rect2.setPosition(startX + rect1.getWidth() - rect2.getWidth(), 
-                                 startY - rect2.getHeight());
-            }
-            default -> {
-                // 默认居中显示
+            
+            // 设置右侧上方矩形位置 (右侧上方)
+            rect2.setPosition(startX + rect1.getWidth(), startY); // 在左侧矩形右侧，顶部对齐
+            
+        } else if (currentShapeIndex == 3) {
+            // 图4：复杂阶梯形 - 定位基本形状
+            // TODO: 添加图4的基本形状定位代码
+        } else if (currentShapeIndex == 4) {
+            // 图5：梯形 - 定位基本形状
+            // TODO: 添加图5的基本形状定位代码
+        } else if (currentShapeIndex == 5) {
+            // 图6：梯形和直角三角形 - 定位基本形状
+            // TODO: 添加图6的基本形状定位代码
+        } else if (currentShapeIndex == 6) {
+            // 图7：复合形状（五边形） - 定位基本形状
+            // TODO: 添加图7的基本形状定位代码
+        } else if (currentShapeIndex == 7) {
+            // 图8：复杂矩形组合（T形） - 定位基本形状
+            // TODO: 添加图8的基本形状定位代码
+        } else if (currentShapeIndex == 8) {
+            // 图9：楼梯形状 - 定位基本形状
+            // TODO: 添加图9的基本形状定位代码
+        }
+        else {
+            // 其他图形的定位逻辑，暂时留空或默认处理
                 if (!currentShapes.isEmpty()) {
                     Shape2D shape = currentShapes.get(0);
-                    shape.setPosition(centerX - shape.getWidth()/2, centerY - shape.getHeight()/2);
-                }
+                shape.setPosition(centerX - shape.getWidth() / 2, centerY - shape.getHeight() / 2);
             }
         }
     }
     
+    // addDimensionLabels方法现在实现第一个和第二个图形的尺寸标注
     private void addDimensionLabels() {
         gc.setFill(Color.BLACK);
-        gc.setFont(javafx.scene.text.Font.font(14));  // 增大字体
+        gc.setFont(javafx.scene.text.Font.font(14));
+        gc.setStroke(Color.BLACK);
         gc.setLineWidth(1.0);
         
-        for (Shape2D shape : currentShapes) {
-            // 获取当前形状的位置
-            double x = 0, y = 0;
+        double scaleFactor = 10.0; // 使用相同的放大系数
+        
+        if (currentShapeIndex == 0) {
+            // 图1：矩形+三角形的尺寸标注
+            Rectangle rect = (Rectangle) currentShapes.get(0);
+            Triangle tri = (Triangle) currentShapes.get(1);
             
-            // 根据形状类型添加不同的标签
-            if (shape instanceof Rectangle) {
-                Rectangle rect = (Rectangle) shape;
-                x = rect.getX();
-                y = rect.getY();
+            double rectX = rect.getX();
+            double rectY = rect.getY();
+            double rectWidth = rect.getWidth();
+            double rectHeight = rect.getHeight();
+            
+            double triX = tri.getX();
+            double triY = tri.getY();
+            double triBase = tri.getBase(); // 垂直高度
+            double triHeight = tri.getHeight(); // 水平长度
+            
+            // 标注矩形高度 (左侧)
+            gc.fillText(String.format("%.0f cm", 14.0), rectX - 30, rectY + rectHeight/2);
+            gc.strokeLine(rectX - 5, rectY, rectX - 5, rectY + rectHeight);
+            gc.strokeLine(rectX - 2, rectY, rectX - 8, rectY);
+            gc.strokeLine(rectX - 2, rectY + rectHeight, rectX - 8, rectY + rectHeight);
+            
+            // 标注矩形底部宽度 (底部)
+            gc.fillText(String.format("%.0f cm", 14.0), rectX + rectWidth/2 - 15, rectY + rectHeight + 15);
+            gc.strokeLine(rectX, rectY + rectHeight + 5, rectX + rectWidth, rectY + rectHeight + 5);
+            gc.strokeLine(rectX, rectY + rectHeight + 2, rectX, rectY + rectHeight + 8);
+            gc.strokeLine(rectX + rectWidth, rectY + rectHeight + 2, rectX + rectWidth, rectY + rectHeight + 8);
+            
+            // 标注三角形斜边 (右上和右下)
+            // 右上斜边中点
+            double upperTriMidX = triX + triHeight/2;
+            double upperTriMidY = triY + triBase/4;
+            gc.fillText(String.format("%.0f cm", 5.0), upperTriMidX + 10, upperTriMidY - 5);
+            // 右下斜边中点
+            double lowerTriMidX = triX + triHeight/2;
+            double lowerTriMidY = triY + triBase * 3/4;
+             gc.fillText(String.format("%.0f cm", 5.0), lowerTriMidX + 10, lowerTriMidY + 15);
+             
+             // 绘制斜边指示线 (简化处理，只画短线)
+             gc.strokeLine(upperTriMidX, upperTriMidY, upperTriMidX + 5, upperTriMidY - 5);
+             gc.strokeLine(lowerTriMidX, lowerTriMidY, lowerTriMidX + 5, lowerTriMidY + 5);
+
+        } else if (currentShapeIndex == 1) {
+            // 图2：L形的尺寸标注
+            Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左上角矩形
+            Rectangle rect2 = (Rectangle) currentShapes.get(1); // 下方矩形
+            
+            double rect1X = rect1.getX();
+            double rect1Y = rect1.getY();
+            double rect1Width = rect1.getWidth();
+            double rect1Height = rect1.getHeight();
+            
+            double rect2X = rect2.getX();
+            double rect2Y = rect2.getY();
+            double rect2Width = rect2.getWidth();
+            double rect2Height = rect2.getHeight();
+            
+            // 标注尺寸 (根据图片从左到右，从上到下)
+            // 左侧总高 21 cm
+            gc.fillText(String.format("%.0f cm", 21.0), rect1X - 30, rect1Y + (rect1Height + rect2Height)/2);
+            gc.strokeLine(rect1X - 5, rect1Y, rect1X - 5, rect2Y + rect2Height);
+            gc.strokeLine(rect1X - 2, rect1Y, rect1X - 8, rect1Y);
+            gc.strokeLine(rect1X - 2, rect2Y + rect2Height, rect1X - 8, rect2Y + rect2Height);
+            
+            // 左上横边 11 cm
+            gc.fillText(String.format("%.0f cm", 11.0), rect1X + rect1Width/2 - 15, rect1Y - 10);
+            gc.strokeLine(rect1X, rect1Y - 5, rect1X + rect1Width, rect1Y - 5);
+            gc.strokeLine(rect1X, rect1Y - 2, rect1X, rect1Y - 8);
+            gc.strokeLine(rect1X + rect1Width, rect1Y - 2, rect1X + rect1Width, rect1Y - 8);
                 
-                // 添加宽度标签
-                gc.fillText(String.format("%.1f", rect.getWidth()), 
-                           x + rect.getWidth()/2 - 15, 
-                           y - 10);
+            // 右上竖边 11 cm
+            gc.fillText(String.format("%.0f cm", 11.0), rect1X + rect1Width + 10, rect1Y + rect1Height/2);
+            gc.strokeLine(rect1X + rect1Width + 5, rect1Y, rect1X + rect1Width + 5, rect1Y + rect1Height);
+            gc.strokeLine(rect1X + rect1Width + 2, rect1Y, rect1X + rect1Width + 8, rect1Y);
+            gc.strokeLine(rect1X + rect1Width + 2, rect1Y + rect1Height, rect1X + rect1Width + 8, rect1Y + rect1Height);
                 
-                // 添加高度标签
-                gc.fillText(String.format("%.1f", rect.getHeight()), 
-                           x - 30, 
-                           y + rect.getHeight()/2);
-                           
-                // 绘制指示线
-                gc.setStroke(Color.BLACK);
-                // 宽度指示线
-                gc.strokeLine(x, y - 5, x + rect.getWidth(), y - 5);
-                gc.strokeLine(x, y - 2, x, y - 8);
-                gc.strokeLine(x + rect.getWidth(), y - 2, x + rect.getWidth(), y - 8);
-                // 高度指示线
-                gc.strokeLine(x - 5, y, x - 5, y + rect.getHeight());
-                gc.strokeLine(x - 2, y, x - 8, y);
-                gc.strokeLine(x - 2, y + rect.getHeight(), x - 8, y + rect.getHeight());
-            } 
-            else if (shape instanceof Triangle) {
-                Triangle tri = (Triangle) shape;
-                x = tri.getX();
-                y = tri.getY();
-                
-                // 添加底边标签
-                gc.fillText(String.format("%.1f", tri.getBase()), 
-                           x + tri.getWidth()/2 - 15, 
-                           y + tri.getHeight() + 15);
-                
-                // 添加高度标签
-                gc.fillText(String.format("%.1f", tri.getHeight()), 
-                           x - 30, 
-                           y + tri.getHeight()/2);
-                           
-                // 绘制指示线
-                gc.setStroke(Color.BLACK);
-                // 底边指示线
-                gc.strokeLine(x, y + tri.getHeight() + 5, x + tri.getWidth(), y + tri.getHeight() + 5);
-                gc.strokeLine(x, y + tri.getHeight() + 2, x, y + tri.getHeight() + 8);
-                gc.strokeLine(x + tri.getWidth(), y + tri.getHeight() + 2, x + tri.getWidth(), y + tri.getHeight() + 8);
-                // 高度指示线
-                gc.strokeLine(x - 5, y, x - 5, y + tri.getHeight());
-                gc.strokeLine(x - 2, y, x - 8, y);
-                gc.strokeLine(x - 2, y + tri.getHeight(), x - 8, y + tri.getHeight());
-            }
-            else if (shape instanceof Trapezium) {
-                Trapezium trap = (Trapezium) shape;
-                x = trap.getX();
-                y = trap.getY();
-                double offset = (trap.getBottomWidth() - trap.getTopWidth()) / 2;
-                
-                // 添加上底标签
-                gc.fillText(String.format("%.1f", trap.getTopWidth()), 
-                           x + offset + trap.getTopWidth()/2 - 15, 
-                           y - 10);
-                
-                // 添加下底标签
-                gc.fillText(String.format("%.1f", trap.getBottomWidth()), 
-                           x + trap.getBottomWidth()/2 - 15, 
-                           y + trap.getHeight() + 15);
-                
-                // 添加高度标签
-                gc.fillText(String.format("%.1f", trap.getHeight()), 
-                           x - 30, 
-                           y + trap.getHeight()/2);
-                           
-                // 绘制指示线
-                gc.setStroke(Color.BLACK);
-                // 上底指示线
-                gc.strokeLine(x + offset, y - 5, x + offset + trap.getTopWidth(), y - 5);
-                gc.strokeLine(x + offset, y - 2, x + offset, y - 8);
-                gc.strokeLine(x + offset + trap.getTopWidth(), y - 2, x + offset + trap.getTopWidth(), y - 8);
-                // 下底指示线
-                gc.strokeLine(x, y + trap.getHeight() + 5, x + trap.getBottomWidth(), y + trap.getHeight() + 5);
-                gc.strokeLine(x, y + trap.getHeight() + 2, x, y + trap.getHeight() + 8);
-                gc.strokeLine(x + trap.getBottomWidth(), y + trap.getHeight() + 2, x + trap.getBottomWidth(), y + trap.getHeight() + 8);
-                // 高度指示线
-                gc.strokeLine(x - 5, y, x - 5, y + trap.getHeight());
-                gc.strokeLine(x - 2, y, x - 8, y);
-                gc.strokeLine(x - 2, y + trap.getHeight(), x - 8, y + trap.getHeight());
-            }
+            // 连接两矩形的横边 10 cm
+            gc.fillText(String.format("%.0f cm", 10.0), rect1X + rect1Width + (rect2Width - rect1Width)/2, rect1Y + rect1Height + 15);
+            gc.strokeLine(rect1X + rect1Width, rect1Y + rect1Height + 5, rect2X + rect2Width, rect1Y + rect1Height + 5);
+            gc.strokeLine(rect1X + rect1Width, rect1Y + rect1Height + 2, rect1X + rect1Width, rect1Y + rect1Height + 8);
+            gc.strokeLine(rect2X + rect2Width, rect1Y + rect1Height + 2, rect2X + rect2Width, rect1Y + rect1Height + 8);
+            
+            // 右下竖边 10 cm
+            gc.fillText(String.format("%.0f cm", 10.0), rect2X + rect2Width + 10, rect2Y + rect2Height/2);
+            gc.strokeLine(rect2X + rect2Width + 5, rect2Y, rect2X + rect2Width + 5, rect2Y + rect2Height);
+            gc.strokeLine(rect2X + rect2Width + 2, rect2Y, rect2X + rect2Width + 8, rect2Y);
+            gc.strokeLine(rect2X + rect2Width + 2, rect2Y + rect2Height, rect2X + rect2Width + 8, rect2Y + rect2Height);
+            
+            // 下横边 20 cm
+            gc.fillText(String.format("%.0f cm", 20.0), rect2X + rect2Width/2 - 15, rect2Y + rect2Height + 15);
+             gc.strokeLine(rect2X, rect2Y + rect2Height + 5, rect2X + rect2Width, rect2Y + rect2Height + 5);
+             gc.strokeLine(rect2X, rect2Y + rect2Height + 2, rect2X, rect2Y + rect2Height + 8);
+             gc.strokeLine(rect2X + rect2Width, rect2Y + rect2Height + 2, rect2X + rect2Width, rect2Y + rect2Height + 8);
+
+        } else if (currentShapeIndex == 2) {
+             // 图3：凹形 - 尺寸标注
+            Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左侧矩形
+            Rectangle rect2 = (Rectangle) currentShapes.get(1); // 右侧上方矩形
+
+            double rect1X = rect1.getX();
+            double rect1Y = rect1.getY();
+            double rect1Width = rect1.getWidth();
+            double rect1Height = rect1.getHeight();
+
+            double rect2X = rect2.getX();
+            double rect2Y = rect2.getY();
+            double rect2Width = rect2.getWidth();
+            double rect2Height = rect2.getHeight();
+
+            // 标注左侧总高 19 cm
+            gc.fillText(String.format("%.0f cm", 19.0), rect1X - 30, rect1Y + rect1Height/2);
+            gc.strokeLine(rect1X - 5, rect1Y, rect1X - 5, rect1Y + rect1Height);
+            gc.strokeLine(rect1X - 8, rect1Y, rect1X - 2, rect1Y);
+            gc.strokeLine(rect1X - 8, rect1Y + rect1Height, rect1X - 2, rect1Y + rect1Height);
+
+            // 标注顶部左侧 18 cm 宽
+            gc.fillText(String.format("%.0f cm", 18.0), rect1X + rect1Width/2 - 15, rect1Y - 10);
+            gc.strokeLine(rect1X, rect1Y - 5, rect1X + rect1Width, rect1Y - 5);
+            gc.strokeLine(rect1X, rect1Y - 8, rect1X, rect1Y - 2);
+            gc.strokeLine(rect1X + rect1Width, rect1Y - 8, rect1X + rect1Width, rect1Y - 2);
+
+            // 标注顶部右侧 16 cm 宽
+            gc.fillText(String.format("%.0f cm", 16.0), rect2X + rect2Width/2 - 15, rect2Y - 10);
+            gc.strokeLine(rect2X, rect2Y - 5, rect2X + rect2Width, rect2Y - 5);
+            gc.strokeLine(rect2X, rect2Y - 8, rect2X, rect2Y - 2);
+            gc.strokeLine(rect2X + rect2Width, rect2Y - 8, rect2X + rect2Width, rect2Y - 2);
+
+            // 标注右侧 16 cm 高
+            gc.fillText(String.format("%.0f cm", 16.0), rect2X + rect2Width + 10, rect1Y + rect1Height - rect2Height/2);
+            gc.strokeLine(rect2X + rect2Width + 5, rect1Y + rect1Height - rect2Height, rect2X + rect2Width + 5, rect1Y + rect1Height);
+            gc.strokeLine(rect2X + rect2Width + 8, rect1Y + rect1Height - rect2Height, rect2X + rect2Width + 2, rect1Y + rect1Height - rect2Height);
+            gc.strokeLine(rect2X + rect2Width + 8, rect1Y + rect1Height, rect2X + rect2Width + 2, rect1Y + rect1Height);
+
+        } else if (currentShapeIndex == 3) {
+             // 图4：复杂阶梯形 - 尺寸标注
+            // TODO: 添加图4的尺寸标注代码
+        } else if (currentShapeIndex == 4) {
+             // 图5：梯形 - 尺寸标注
+            // TODO: 添加图5的尺寸标注代码
+        } else if (currentShapeIndex == 5) {
+             // 图6：梯形和直角三角形 - 尺寸标注
+            // TODO: 添加图6的尺寸标注代码
+        } else if (currentShapeIndex == 6) {
+             // 图7：复合形状（五边形） - 尺寸标注
+            // TODO: 添加图7的尺寸标注代码
+        } else if (currentShapeIndex == 7) {
+             // 图8：复杂矩形组合（T形） - 尺寸标注
+            // TODO: 添加图8的尺寸标注代码
+        } else if (currentShapeIndex == 8) {
+             // 图9：楼梯形状 - 尺寸标注
+            // TODO: 添加图9的尺寸标注代码
         }
+        // 其他图形的尺寸标注逻辑，待实现
     }
 
     private void startTimer() {
@@ -583,10 +668,11 @@ public class CompoundShapeView extends VBox {
     }
 
     private void showSolution() {
-        // 重绘形状
+        // 重绘形状和尺寸标注
         drawCompoundShape();
+        addDimensionLabels(); // 在这里调用addDimensionLabels来显示尺寸标注
         
-        // 绘制解决方案
+        // 绘制解决方案(面积计算过程)
         gc.setFill(Color.BLACK);
         gc.setFont(javafx.scene.text.Font.font(14));
         
@@ -594,18 +680,20 @@ public class CompoundShapeView extends VBox {
         double totalArea = 0;
         
         // 显示每个形状的面积
+        if (currentShapes != null && !currentShapes.isEmpty()) { // 添加非空判断
         for (int i = 0; i < currentShapes.size(); i++) {
             Shape2D shape = currentShapes.get(i);
             String shapeType = shape.getClass().getSimpleName();
             double area = shape.calculateArea();
             String formula = "";
             
+                // 这里需要根据具体形状类实现getFormula方法
             if (shape instanceof Rectangle) {
-                formula = ((Rectangle)shape).getFormula();
+                    formula = "Area = length × width"; // 示例公式
             } else if (shape instanceof Triangle) {
-                formula = ((Triangle)shape).getFormula();
+                    formula = "Area = ½ × base × height"; // 示例公式
             } else if (shape instanceof Trapezium) {
-                formula = ((Trapezium)shape).getFormula();
+                    formula = "Area = ½ × (a + c) × h"; // 示例公式
             }
             
             String areaText = String.format("Shape %d (%s): %.2f - %s",
@@ -613,6 +701,7 @@ public class CompoundShapeView extends VBox {
             gc.fillText(areaText, 20, y);
             totalArea += area;
             y += 20;
+            }
         }
         
         // 显示总面积
@@ -621,8 +710,10 @@ public class CompoundShapeView extends VBox {
         
         // 记录此形状已完成
         if (currentShapeIndex >= 0 && currentShapeIndex < 9) {
+             if (!completedShapes.contains(currentShapeIndex)) { // 避免重复添加
             completedShapes.add(currentShapeIndex);
             updateProgressLabel();
+            }
         }
     }
 
@@ -649,6 +740,8 @@ public class CompoundShapeView extends VBox {
         } else {
             // 否则清空当前选择，等待用户选择下一个形状
             shapeSelector.getSelectionModel().clearSelection();
+            currentShapeIndex = -1; // 重置索引
+            answerField.setDisable(true); // 禁用输入框
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             gc.setFill(Color.BLACK);
             gc.setFont(javafx.scene.text.Font.font(16));
@@ -657,7 +750,8 @@ public class CompoundShapeView extends VBox {
     }
 
     private void checkAnswer() {
-        if (currentShapes.isEmpty()) {
+        // 修改判断条件，检查是否选择了图形(根据索引)
+        if (currentShapeIndex == -1) {
             messageLabel.setText("Please select a shape first");
             messageLabel.setTextFill(Color.RED);
             return;
