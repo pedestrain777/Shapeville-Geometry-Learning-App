@@ -674,43 +674,43 @@ public class CompoundShapeView extends VBox {
             double y7 = rectTop.getY() + rectTop.getHeight();
 
             // 顶部宽 12m
-            gc.fillText("12 m", x4 + rectTop.getWidth() / 2 - 15, y4 - 10);
+            gc.fillText("12 cm", x4 + rectTop.getWidth() / 2 - 15, y4 - 10);
             gc.strokeLine(x4, y4 - 5, x5, y4 - 5);
             gc.strokeLine(x4, y4 - 2, x4, y4 - 8);
             gc.strokeLine(x5, y4 - 2, x5, y4 - 8);
 
             // 左侧高 12m
-            gc.fillText("12 m", x4 - 30, y4 + rectTop.getHeight() / 2);
+            gc.fillText("12 cm", x4 - 30, y4 + rectTop.getHeight() / 2);
             gc.strokeLine(x4 - 5, y4, x4 - 5, y7);
             gc.strokeLine(x4 - 2, y4, x4 - 8, y4);
             gc.strokeLine(x4 - 2, y7, x4 - 8, y7);
 
             // 右侧高 18m
-            gc.fillText("18 m", x6 + 10, y5 + (y2 - y5) / 2);
+            gc.fillText("18 cm", x6 + 10, y5 + (y2 - y5) / 2);
             gc.strokeLine(x6 + 5, y5, x6 + 5, y2);
             gc.strokeLine(x6 + 2, y5, x6 + 8, y5);
             gc.strokeLine(x6 + 2, y2, x6 + 8, y2);
 
             // 底部宽 24m
-            gc.fillText("24 m", x0 + rectBottom.getWidth() / 2 - 15, y2 + 35);
+            gc.fillText("24 cm", x0 + rectBottom.getWidth() / 2 - 15, y2 + 35);
             gc.strokeLine(x0, y2 + 20, x2, y2 + 20);
             gc.strokeLine(x0, y2 + 17, x0, y2 + 23);
             gc.strokeLine(x2, y2 + 17, x2, y2 + 23);
 
             // 左下宽 2m
-            gc.fillText("2 m", x0 + 10, y3 + 15);
+            gc.fillText("2 cm", x0 + 10, y3 + 15);
             gc.strokeLine(x0, y3 + 5, x4, y3 + 5);
             gc.strokeLine(x0, y3 + 2, x0, y3 + 8);
             gc.strokeLine(x4, y3 + 2, x4, y3 + 8);
 
             // 右下宽 10m
-            gc.fillText("10 m", x5 + 10, y2 + 15);
+            gc.fillText("10 cm", x5 + 10, y2 + 15);
             gc.strokeLine(x5, y2 + 5, x2, y2 + 5);
             gc.strokeLine(x5, y2 + 2, x5, y2 + 8);
             gc.strokeLine(x2, y2 + 2, x2, y2 + 8);
 
             // 下方高 6m
-            gc.fillText("6 m", x1 + 10, y1 + rectBottom.getHeight() / 2);
+            gc.fillText("6 cm", x1 + 10, y1 + rectBottom.getHeight() / 2);
             gc.strokeLine(x1 + 5, y1, x1 + 5, y2);
             gc.strokeLine(x1 + 2, y1, x1 + 8, y1);
             gc.strokeLine(x1 + 2, y2, x1 + 8, y2);
