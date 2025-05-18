@@ -21,6 +21,11 @@ public class Main extends Application {
 
         // 播放背景音乐
         AudioPlayer.playWav("/audio/bg_music.wav");
+        
+        // 添加窗口关闭事件处理
+        primaryStage.setOnCloseRequest(event -> {
+            AudioPlayer.stopAll();
+        });
     }
 
     public static void main(String[] args) {
