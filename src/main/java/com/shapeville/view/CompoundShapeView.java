@@ -220,7 +220,10 @@ public class CompoundShapeView extends VBox {
             currentShapes.add(tri);
         } else if (index == 6) {
             // 图7：复合形状（五边形，矩形+三角形） - 创建基本形状
-            // TODO: 添加图7的基本形状创建代码
+             Rectangle rect = new Rectangle(14 * scaleFactor, 5 * scaleFactor); // 矩形
+            Triangle tri = new Triangle(14 * scaleFactor, 10 * scaleFactor);   // 三角形
+            currentShapes.add(rect);
+            currentShapes.add(tri);
         } else if (index == 7) {
             // 图8：复杂矩形组合（T形） - 创建基本形状
             // 上方正方形36x36，下方长方形60x36
@@ -257,7 +260,7 @@ public class CompoundShapeView extends VBox {
         if (currentShapeIndex == 0) {
             // 图1的特殊绘制：统一颜色，只绘制外轮廓
             gc.setFill(Color.LIGHTBLUE); // 修改为浅蓝色
-
+            
             Rectangle rect = (Rectangle) currentShapes.get(0);
             Triangle tri = (Triangle) currentShapes.get(1);
 
@@ -451,7 +454,31 @@ public class CompoundShapeView extends VBox {
             gc.strokePolygon(xPoints, yPoints, 4);
         } else if (currentShapeIndex == 6) {
             // 图7的特殊绘制：统一颜色，只绘制外轮廓
-            // TODO: 添加图7的填充颜色和外轮廓绘制代码
+            gc.setFill(Color.LIGHTBLUE);
+
+            Rectangle rect = (Rectangle) currentShapes.get(0);
+            Triangle tri = (Triangle) currentShapes.get(1);
+
+            double x0 = rect.getX();
+            double y0 = rect.getY();
+            double x1 = x0 ;
+            double y1 = y0+rect.getHeight();
+            double x2 = x1+ rect.getWidth();
+            double y2 = y1;
+            double x3=x0+rect.getWidth();
+            double y3=y0;
+            double x4 = x0+(3.0/7.0)*rect.getWidth();
+            double y4 = y0-tri.getHeight();
+            double[] xPoints = {x0, x1, x2, x3,x4};
+            double[] yPoints = {y0, y1, y2, y3,y4};
+
+            gc.fillPolygon(xPoints, yPoints, 5);
+            gc.setStroke(Color.BLACK);
+            gc.setLineWidth(2.0);
+            gc.strokePolygon(xPoints, yPoints, 5);
+            double W  = rect.getWidth();
+            double H1 = rect.getHeight();
+            double H2 = tri.getHeight();
         } else if (currentShapeIndex == 7) {
             // 图8：复杂矩形组合（T形）- 绘制
             gc.setFill(Color.LIGHTBLUE); // 统一设置为浅蓝色
@@ -580,7 +607,7 @@ public class CompoundShapeView extends VBox {
             // 整体宽度 20，整体高度 21
             double totalWidth = 20 * 10.0;
             double totalHeight = (11 + 10) * 10.0; // 11(左上高)+10(下方高)
-
+            
             // 计算整体起始位置，使其居中
             double startX = centerX - totalWidth / 2;
             double startY = centerY - totalHeight / 2;
@@ -645,7 +672,14 @@ public class CompoundShapeView extends VBox {
             tri.setPosition(startX + rect.getWidth(), startY);
         } else if (currentShapeIndex == 6) {
             // 图7：复合形状（五边形） - 定位基本形状
-            // TODO: 添加图7的基本形状定位代码
+             Rectangle rect = (Rectangle) currentShapes.get(0);
+            Triangle tri = (Triangle) currentShapes.get(1);
+            double totalWidth = 14 * 10.0 ;
+            double totalHeight = 15 * 10.0;
+            double startX = centerX - totalWidth / 2;
+            double startY = centerY - totalHeight / 2;
+            rect.setPosition(startX, startY);
+            tri.setPosition(startX , startY+ rect.getHeight());
         } else if (currentShapeIndex == 7) {
             // 图8：复杂矩形组合（T形）- 定位
 
@@ -703,29 +737,29 @@ public class CompoundShapeView extends VBox {
             // 图1：矩形+三角形的尺寸标注
             Rectangle rect = (Rectangle) currentShapes.get(0);
             Triangle tri = (Triangle) currentShapes.get(1);
-
+            
             double rectX = rect.getX();
             double rectY = rect.getY();
             double rectWidth = rect.getWidth();
             double rectHeight = rect.getHeight();
-
+            
             double triX = tri.getX();
             double triY = tri.getY();
             double triBase = tri.getBase(); // 垂直高度
             double triHeight = tri.getHeight(); // 水平长度
-
+            
             // 标注矩形高度 (左侧)
             gc.fillText(String.format("%.0f cm", 14.0), rectX - 30, rectY + rectHeight/2);
             gc.strokeLine(rectX - 5, rectY, rectX - 5, rectY + rectHeight);
             gc.strokeLine(rectX - 2, rectY, rectX - 8, rectY);
             gc.strokeLine(rectX - 2, rectY + rectHeight, rectX - 8, rectY + rectHeight);
-
+            
             // 标注矩形底部宽度 (底部)
             gc.fillText(String.format("%.0f cm", 14.0), rectX + rectWidth/2 - 15, rectY + rectHeight + 15);
             gc.strokeLine(rectX, rectY + rectHeight + 5, rectX + rectWidth, rectY + rectHeight + 5);
             gc.strokeLine(rectX, rectY + rectHeight + 2, rectX, rectY + rectHeight + 8);
             gc.strokeLine(rectX + rectWidth, rectY + rectHeight + 2, rectX + rectWidth, rectY + rectHeight + 8);
-
+            
             // 标注三角形斜边 (右上和右下)
             // 右上斜边中点
             double upperTriMidX = triX + triHeight/2;
@@ -751,56 +785,56 @@ public class CompoundShapeView extends VBox {
             // 图2：L形的尺寸标注
             Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左上角矩形
             Rectangle rect2 = (Rectangle) currentShapes.get(1); // 下方矩形
-
+            
             double rect1X = rect1.getX();
             double rect1Y = rect1.getY();
             double rect1Width = rect1.getWidth();
             double rect1Height = rect1.getHeight();
-
+            
             double rect2X = rect2.getX();
             double rect2Y = rect2.getY();
             double rect2Width = rect2.getWidth();
             double rect2Height = rect2.getHeight();
-
+            
             // 标注尺寸 (根据图片从左到右，从上到下)
             // 左侧总高 21 cm
             gc.fillText(String.format("%.0f cm", 21.0), rect1X - 30, rect1Y + (rect1Height + rect2Height)/2);
             gc.strokeLine(rect1X - 5, rect1Y, rect1X - 5, rect2Y + rect2Height);
             gc.strokeLine(rect1X - 2, rect1Y, rect1X - 8, rect1Y);
             gc.strokeLine(rect1X - 2, rect2Y + rect2Height, rect1X - 8, rect2Y + rect2Height);
-
+            
             // 左上横边 11 cm
             gc.fillText(String.format("%.0f cm", 11.0), rect1X + rect1Width/2 - 15, rect1Y - 10);
             gc.strokeLine(rect1X, rect1Y - 5, rect1X + rect1Width, rect1Y - 5);
             gc.strokeLine(rect1X, rect1Y - 2, rect1X, rect1Y - 8);
             gc.strokeLine(rect1X + rect1Width, rect1Y - 2, rect1X + rect1Width, rect1Y - 8);
-
+                
             // 右上竖边 11 cm
             gc.fillText(String.format("%.0f cm", 11.0), rect1X + rect1Width + 10, rect1Y + rect1Height/2);
             gc.strokeLine(rect1X + rect1Width + 5, rect1Y, rect1X + rect1Width + 5, rect1Y + rect1Height);
             gc.strokeLine(rect1X + rect1Width + 2, rect1Y, rect1X + rect1Width + 8, rect1Y);
             gc.strokeLine(rect1X + rect1Width + 2, rect1Y + rect1Height, rect1X + rect1Width + 8, rect1Y + rect1Height);
-
+                
             // 连接两矩形的横边 10 cm
             gc.fillText(String.format("%.0f cm", 10.0), rect1X + rect1Width + (rect2Width - rect1Width)/2, rect1Y + rect1Height + 15);
             gc.strokeLine(rect1X + rect1Width, rect1Y + rect1Height + 5, rect2X + rect2Width, rect1Y + rect1Height + 5);
             gc.strokeLine(rect1X + rect1Width, rect1Y + rect1Height + 2, rect1X + rect1Width, rect1Y + rect1Height + 8);
             gc.strokeLine(rect2X + rect2Width, rect1Y + rect1Height + 2, rect2X + rect2Width, rect1Y + rect1Height + 8);
-
+            
             // 右下竖边 10 cm
             gc.fillText(String.format("%.0f cm", 10.0), rect2X + rect2Width + 10, rect2Y + rect2Height/2);
             gc.strokeLine(rect2X + rect2Width + 5, rect2Y, rect2X + rect2Width + 5, rect2Y + rect2Height);
             gc.strokeLine(rect2X + rect2Width + 2, rect2Y, rect2X + rect2Width + 8, rect2Y);
             gc.strokeLine(rect2X + rect2Width + 2, rect2Y + rect2Height, rect2X + rect2Width + 8, rect2Y + rect2Height);
-
+            
             // 下横边 20 cm
             gc.fillText(String.format("%.0f cm", 20.0), rect2X + rect2Width/2 - 15, rect2Y + rect2Height + 15);
-            gc.strokeLine(rect2X, rect2Y + rect2Height + 5, rect2X + rect2Width, rect2Y + rect2Height + 5);
-            gc.strokeLine(rect2X, rect2Y + rect2Height + 2, rect2X, rect2Y + rect2Height + 8);
-            gc.strokeLine(rect2X + rect2Width, rect2Y + rect2Height + 2, rect2X + rect2Width, rect2Y + rect2Height + 8);
+             gc.strokeLine(rect2X, rect2Y + rect2Height + 5, rect2X + rect2Width, rect2Y + rect2Height + 5);
+             gc.strokeLine(rect2X, rect2Y + rect2Height + 2, rect2X, rect2Y + rect2Height + 8);
+             gc.strokeLine(rect2X + rect2Width, rect2Y + rect2Height + 2, rect2X + rect2Width, rect2Y + rect2Height + 8);
 
         } else if (currentShapeIndex == 2) {
-            // 图3：凹形 - 尺寸标注
+             // 图3：凹形 - 尺寸标注
             Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左侧矩形
             Rectangle rect2 = (Rectangle) currentShapes.get(1); // 右侧上方矩形
 
@@ -982,6 +1016,48 @@ public class CompoundShapeView extends VBox {
             double dy = shortLen * Math.sin(angle) / 2;
             gc.strokeLine(midX - dx, midY - dy, midX + dx, midY + dy);
         } else if (currentShapeIndex == 6) {
+             // 图7：复合形状（五边形） - 尺寸标注
+             Rectangle rect = (Rectangle) currentShapes.get(0);
+            Triangle  tri  = (Triangle)   currentShapes.get(1);
+
+            double x0 = rect.getX(),
+                    y0 = rect.getY();        // 矩形左上
+            double w  = rect.getWidth(),     // = 14×scale
+                    h1 = rect.getHeight();    // = 5×scale
+            double h2 = tri.getHeight();     // = 10×scale
+
+            gc.setStroke(Color.BLACK);
+            gc.setFill(Color.BLACK);
+            gc.setLineWidth(1);
+            gc.setFont(Font.font(14));
+
+            double offset = 8;  // 主标注线离图形边缘的距离
+            double tick   = 5;  // 刻线超出主线两端的长度
+
+            // —— 1) 三角高度（15） —— //
+            double apexX   = x0 + w*(3.0/7.0);
+            double apexY   = y0 - h2;
+            double baseY   = y0 + h1;
+            double lineTop = apexY - offset/4;
+            double lineBot = baseY + offset;
+            gc.strokeLine(apexX, lineTop, apexX, lineBot);
+            gc.strokeLine(apexX - tick, lineTop, apexX + tick, lineTop);
+            gc.strokeLine(apexX - tick, lineBot,  apexX + tick, lineBot);
+            gc.fillText("15cm", apexX + 5, (lineTop + lineBot)/2 + 5);
+
+            double bottomY = y0 + h1;
+            double yLine   = bottomY + offset;
+            gc.strokeLine(x0,    yLine, x0 + w, yLine);
+            gc.strokeLine(x0,    yLine - tick, x0,    yLine + tick);
+            gc.strokeLine(x0 + w, yLine - tick, x0 + w, yLine + tick);
+            gc.fillText("14cm", x0 + w/2 - 10, yLine + 15);
+            double xLeft = x0 - offset;
+            double yTopL = y0;
+            double yBotL = y0 + h1;
+            gc.strokeLine(xLeft, yTopL, xLeft, yBotL);
+            gc.strokeLine(xLeft - tick, yTopL,   xLeft + tick, yTopL);
+            gc.strokeLine(xLeft - tick, yBotL,   xLeft + tick, yBotL);
+            gc.fillText("5cm", xLeft - 15, yTopL + h1/2 + 5);
             // 图7：复合形状（五边形） - 尺寸标注
             // TODO: 添加图7的尺寸标注代码
         } else if (currentShapeIndex == 7) {
@@ -1049,7 +1125,7 @@ public class CompoundShapeView extends VBox {
             gc.strokeLine(x1 + 2, y1, x1 + 8, y1);
             gc.strokeLine(x1 + 2, y2, x1 + 8, y2);
         } else if (currentShapeIndex == 8) {
-            // 图9：楼梯形状 - 尺寸标注
+             // 图9：楼梯形状 - 尺寸标注
             Rectangle rectLeft = (Rectangle) currentShapes.get(0); // 左侧矩形
             Rectangle rectRight = (Rectangle) currentShapes.get(1); // 右侧矩形
 
@@ -1087,7 +1163,7 @@ public class CompoundShapeView extends VBox {
             gc.strokeLine(rectRightX + rectRightWidth + 8, rectRightY, rectRightX + rectRightWidth + 2, rectRightY);
             gc.strokeLine(rectRightX + rectRightWidth + 8, rectRightY + rectRightHeight, rectRightX + rectRightWidth + 2, rectRightY + rectRightHeight);
 
-            // 标注右侧宽 8 cm
+             // 标注右侧宽 8 cm
             gc.fillText(String.format("%.0f cm", 8.0), rectRightX + rectRightWidth/2 - 15, rectRightY - 10);
             gc.strokeLine(rectRightX, rectRightY - 5, rectRightX + rectRightWidth, rectRightY - 5);
             gc.strokeLine(rectRightX, rectRightY - 8, rectRightX, rectRightY - 2);
@@ -1147,7 +1223,7 @@ public class CompoundShapeView extends VBox {
         // 重绘形状和尺寸标注
         drawCompoundShape();
         addDimensionLabels();
-
+        
         // 显示解答图片
         if (currentShapeIndex >= 0 && currentShapeIndex < 9) {
             String imagePath = String.format("/images/sol%d.png", currentShapeIndex + 1);
@@ -1161,7 +1237,7 @@ public class CompoundShapeView extends VBox {
                 System.err.println("The solution image cannot be loaded: " + imagePath);
             }
         }
-
+        
         // 记录此形状已完成
         if (currentShapeIndex >= 0 && currentShapeIndex < 9) {
             if (!completedShapes.contains(currentShapeIndex)) {
@@ -1178,7 +1254,7 @@ public class CompoundShapeView extends VBox {
         if (timer != null) {
             timer.cancel();
         }
-
+        
         // 如果已完成所有形状，返回主界面
         if (completedShapes.size() >= 9) {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -1186,7 +1262,7 @@ public class CompoundShapeView extends VBox {
             alert.setHeaderText("Great Job!");
             alert.setContentText("You have completed all compound shapes!");
             alert.showAndWait();
-
+            
             // 返回主菜单
             MainView mainView = new MainView();
             mainView.getGameController().setCurrentScore(gameController.getCurrentScore());
@@ -1215,7 +1291,7 @@ public class CompoundShapeView extends VBox {
         try {
             double answer = Double.parseDouble(answerField.getText().trim());
             double correctAnswer;
-
+            
             // 根据不同图形计算正确答案
             switch (currentShapeIndex) {
                 case 0:
