@@ -1024,49 +1024,27 @@ public class CompoundShapeView extends VBox {
     private void showSolution() {
         // 重绘形状和尺寸标注
         drawCompoundShape();
-        addDimensionLabels(); // 在这里调用addDimensionLabels来显示尺寸标注
+        addDimensionLabels();
         
-        // 绘制解决方案(面积计算过程)
-        gc.setFill(Color.BLACK);
-        gc.setFont(javafx.scene.text.Font.font(14));
-        
-        double y = 30;
-        double totalArea = 0;
-        
-        // 显示每个形状的面积
-        if (currentShapes != null && !currentShapes.isEmpty()) { // 添加非空判断
-        for (int i = 0; i < currentShapes.size(); i++) {
-            Shape2D shape = currentShapes.get(i);
-            String shapeType = shape.getClass().getSimpleName();
-            double area = shape.calculateArea();
-            String formula = "";
-            
-                // 这里需要根据具体形状类实现getFormula方法
-            if (shape instanceof Rectangle) {
-                    formula = "Area = length × width"; // 示例公式
-            } else if (shape instanceof Triangle) {
-                    formula = "Area = ½ × base × height"; // 示例公式
-            } else if (shape instanceof Trapezium) {
-                    formula = "Area = ½ × (a + c) × h"; // 示例公式
-            }
-            
-            String areaText = String.format("Shape %d (%s): %.2f - %s",
-                              i + 1, shapeType, area, formula);
-            gc.fillText(areaText, 20, y);
-            totalArea += area;
-            y += 20;
+        // 显示解答图片
+        if (currentShapeIndex >= 0 && currentShapeIndex < 9) {
+            String imagePath = String.format("/images/sol%d.png", currentShapeIndex + 1);
+            try {
+                javafx.scene.image.Image solutionImage = new javafx.scene.image.Image(getClass().getResourceAsStream(imagePath));
+                // 清除画布
+                gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+                // 图片覆盖整个画布
+                gc.drawImage(solutionImage, 0, 0, canvas.getWidth(), canvas.getHeight());
+            } catch (Exception e) {
+                System.err.println("无法加载解答图片: " + imagePath);
             }
         }
         
-        // 显示总面积
-        gc.setFont(javafx.scene.text.Font.font(16));
-        gc.fillText(String.format("Total area: %.2f", totalArea), 20, y + 20);
-        
         // 记录此形状已完成
         if (currentShapeIndex >= 0 && currentShapeIndex < 9) {
-             if (!completedShapes.contains(currentShapeIndex)) { // 避免重复添加
-            completedShapes.add(currentShapeIndex);
-            updateProgressLabel();
+            if (!completedShapes.contains(currentShapeIndex)) {
+                completedShapes.add(currentShapeIndex);
+                updateProgressLabel();
             }
         }
     }
@@ -1114,9 +1092,43 @@ public class CompoundShapeView extends VBox {
         attempts++;
         try {
             double answer = Double.parseDouble(answerField.getText().trim());
-            double correctAnswer = calculateTotalArea();
+            double correctAnswer;
+            
+            // 根据不同图形计算正确答案
+            switch (currentShapeIndex) {
+                case 0:
+                    correctAnswer = 252.0; // 第一个图形：矩形(14x14) + 三角形
+                    break;
+                case 1:
+                    correctAnswer = 310.0; // 第二个图形：L形（11x11 + 20x10）
+                    break;
+                case 2:
+                    correctAnswer = 598.0; // 第三个图形：凹形
+                    break;
+                case 3:
+                    correctAnswer = 216.0; // 第四个图形：T形
+                    break;
+                case 4:
+                    correctAnswer = 16.0; // 第五个图形：直角梯形
+                    break;
+                case 5:
+                    correctAnswer = 159.5; // 第六个图形：梯形和直角三角形
+                    break;
+                case 6:
+                    correctAnswer = 140.0; // 第七个图形：复合形状（五边形）
+                    break;
+                case 7:
+                    correctAnswer = 3256.0; // 第八个图形：复杂矩形组合
+                    break;
+                case 8:
+                    correctAnswer = 174.0; // 第九个图形：楼梯形状
+                    break;
+                default:
+                    correctAnswer = calculateTotalArea();
+                    break;
+            }
 
-            // Allow for small rounding differences
+            // Allow for small rounding differences (0.1)
             if (Math.abs(answer - correctAnswer) < 0.1) {
                 if (timer != null) {
                     timer.cancel();
@@ -1125,7 +1137,7 @@ public class CompoundShapeView extends VBox {
                 AudioPlayer.playEffect("/audio/correct.wav");
                 messageLabel.setText("Correct! Well done!");
                 messageLabel.setTextFill(Color.GREEN);
-                gameController.addPoints(attempts, true); // Advanced level scoring
+                gameController.addPoints(attempts, true);
 
                 showSolution();
 
