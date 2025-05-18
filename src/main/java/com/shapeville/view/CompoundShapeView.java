@@ -686,6 +686,13 @@ public class CompoundShapeView extends VBox {
              gc.strokeLine(upperTriMidX, upperTriMidY, upperTriMidX + 5, upperTriMidY - 5);
              gc.strokeLine(lowerTriMidX, lowerTriMidY, lowerTriMidX + 5, lowerTriMidY + 5);
 
+            // 添加新的水平长度标注 (22cm)
+            double totalWidth = rectWidth + triHeight; // 总宽度
+            gc.fillText(String.format("%.0f cm", 22.0), rectX + totalWidth/2 - 15, rectY - 25);
+            gc.strokeLine(rectX, rectY - 15, rectX + totalWidth, rectY - 15);
+            gc.strokeLine(rectX, rectY - 12, rectX, rectY - 18);
+            gc.strokeLine(rectX + totalWidth, rectY - 12, rectX + totalWidth, rectY - 18);
+
         } else if (currentShapeIndex == 1) {
             // 图2：L形的尺寸标注
             Rectangle rect1 = (Rectangle) currentShapes.get(0); // 左上角矩形
@@ -1036,7 +1043,7 @@ public class CompoundShapeView extends VBox {
                 // 图片覆盖整个画布
                 gc.drawImage(solutionImage, 0, 0, canvas.getWidth(), canvas.getHeight());
             } catch (Exception e) {
-                System.err.println("无法加载解答图片: " + imagePath);
+                System.err.println("The solution image cannot be loaded: " + imagePath);
             }
         }
         
@@ -1077,7 +1084,7 @@ public class CompoundShapeView extends VBox {
             gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
             gc.setFill(Color.BLACK);
             gc.setFont(javafx.scene.text.Font.font(16));
-            gc.fillText("请从上方下拉菜单选择一个复合形状", 120, 200);
+            gc.fillText("Please select a composite shape", 120, 200);
         }
     }
 
