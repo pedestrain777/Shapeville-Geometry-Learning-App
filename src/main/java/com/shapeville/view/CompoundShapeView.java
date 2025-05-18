@@ -181,7 +181,7 @@ public class CompoundShapeView extends VBox {
             // 下底4cm，左边6cm，右边2cm，上底斜边5cm
             // 用自定义Shape2D实现
             currentShapes.clear();
-            currentShapes.add(new Shape2D("rightTrapezium", javafx.scene.paint.Color.LIGHTBLUE, 4 * 10.0, 6 * 10.0) {
+            currentShapes.add(new Shape2D("rightTrapezium", javafx.scene.paint.Color.LIGHTBLUE, 8 * 10.0, 12 * 10.0) {
                 @Override
                 public double calculateArea() {
                     return 0.5 * (4 + 5) * 6; // 梯形面积公式
@@ -191,8 +191,8 @@ public class CompoundShapeView extends VBox {
                     double x = this.x;
                     double y = this.y;
                     double scale = 10.0;
-                    double[] xPoints = {x, x, x + 4*scale, x + 4*scale};
-                    double[] yPoints = {y, y - 6*scale, y - 2*scale, y};
+                    double[] xPoints = {x, x, x + 8*scale, x + 8*scale};
+                    double[] yPoints = {y, y - 12*scale, y - 4*scale, y};
                     gc.setFill(this.getColor());
                     gc.fillPolygon(xPoints, yPoints, 4);
                     gc.setStroke(javafx.scene.paint.Color.BLACK);
@@ -202,7 +202,7 @@ public class CompoundShapeView extends VBox {
                 @Override
                 public Shape2D copy() {
                     Shape2D that = this;
-                    return new Shape2D("rightTrapezium", that.getColor(), 4 * 10.0, 6 * 10.0) {
+                    return new Shape2D("rightTrapezium", that.getColor(), 8 * 10.0, 12 * 10.0) {
                         @Override
                         public double calculateArea() { return that.calculateArea(); }
                         @Override
@@ -587,8 +587,8 @@ public class CompoundShapeView extends VBox {
         } else if (currentShapeIndex == 4) {
             // 图5：直角梯形 - 定位基本形状
             Shape2D trap = currentShapes.get(0);
-            double width = 4 * 10.0;
-            double height = 6 * 10.0;
+            double width = 8 * 10.0;
+            double height = 12 * 10.0;
             double startX = centerX - width / 2;
             double startY = centerY + height / 2;
             trap.setPosition(startX, startY);
@@ -854,30 +854,30 @@ public class CompoundShapeView extends VBox {
             double y = trap.getY();
             double scale = 10.0;
             // 直接在此处计算顶点
-            double[] xPoints = {x, x, x + 4*scale, x + 4*scale};
-            double[] yPoints = {y, y - 6*scale, y - 2*scale, y};
+            double[] xPoints = {x, x, x + 8*scale, x + 8*scale};
+            double[] yPoints = {y, y - 12*scale, y - 4*scale, y};
             // 下底 4cm
-            gc.fillText("4 cm", x + 2*scale - 10, y + 20);
-            gc.strokeLine(x, y + 10, x + 4*scale, y + 10);
+            gc.fillText("4 cm", x + 4*scale - 10, y + 20);
+            gc.strokeLine(x, y + 10, x + 8*scale, y + 10);
             gc.strokeLine(x, y + 7, x, y + 13);
-            gc.strokeLine(x + 4*scale, y + 7, x + 4*scale, y + 13);
+            gc.strokeLine(x + 8*scale, y + 7, x + 8*scale, y + 13);
             // 左边 6cm
-            gc.fillText("6 cm", x - 35, y - 3*scale);
-            gc.strokeLine(x - 10, y, x - 10, y - 6*scale);
+            gc.fillText("6 cm", x - 35, y - 6*scale);
+            gc.strokeLine(x - 10, y, x - 10, y - 12*scale);
             gc.strokeLine(x - 7, y, x - 13, y);
-            gc.strokeLine(x - 7, y - 6*scale, x - 13, y - 6*scale);
+            gc.strokeLine(x - 7, y - 12*scale, x - 13, y - 12*scale);
             // 右边 2cm
-            gc.fillText("2 cm", x + 4*scale + 10, y - scale);
-            gc.strokeLine(x + 4*scale + 5, y, x + 4*scale + 5, y - 2*scale);
-            gc.strokeLine(x + 4*scale + 2, y, x + 4*scale + 8, y);
-            gc.strokeLine(x + 4*scale + 2, y - 2*scale, x + 4*scale + 8, y - 2*scale);
-            // 上底斜边 5cm
-            double midX = (x + x + 4*scale) / 2;
-            double midY = (y - 6*scale + y - 2*scale) / 2;
-            gc.fillText("5 cm", midX - 10, midY - 10);
-            gc.strokeLine(x, y - 6*scale - 5, x + 4*scale, y - 2*scale - 5);
-            gc.strokeLine(x, y - 6*scale - 2, x, y - 6*scale - 8);
-            gc.strokeLine(x + 4*scale, y - 2*scale - 2, x + 4*scale, y - 2*scale - 8);
+            gc.fillText("2 cm", x + 8*scale + 10, y - scale);
+            gc.strokeLine(x + 8*scale + 5, y, x + 8*scale + 5, y - 4*scale);
+            gc.strokeLine(x + 8*scale + 2, y, x + 8*scale + 8, y);
+            gc.strokeLine(x + 8*scale + 2, y - 4*scale, x + 8*scale + 8, y - 4*scale);
+//            // 上底斜边 5cm
+//            double midX = (x + x + 4*scale) / 2;
+//            double midY = (y - 6*scale + y - 2*scale) / 2;
+//            gc.fillText("5 cm", midX - 10, midY - 10);
+//            gc.strokeLine(x, y - 6*scale - 5, x + 4*scale, y - 2*scale - 5);
+//            gc.strokeLine(x, y - 6*scale - 2, x, y - 6*scale - 8);
+//            gc.strokeLine(x + 4*scale, y - 2*scale - 2, x + 4*scale, y - 2*scale - 8);
         } else if (currentShapeIndex == 5) {
             // 图6：直角梯形 - 尺寸标注
             Rectangle rect = (Rectangle) currentShapes.get(0);
