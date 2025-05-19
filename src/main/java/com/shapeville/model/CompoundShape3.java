@@ -106,16 +106,17 @@ public class CompoundShape3 extends AbstractCompoundShape {
         gc.strokeLine(rect1X - 8, rect1Y + rect1Height, rect1X - 2, rect1Y + rect1Height);
 
         // 标注顶部左侧 18 cm 宽
-        gc.fillText(String.format("%.0f cm", 18.0), rect1X + rect1Width / 2 - 15, rect1Y - 10);
+        gc.fillText(String.format("%.0f cm", 18.0), rect1X + rect1Width/2 - 15, rect1Y - 10);
         gc.strokeLine(rect1X, rect1Y - 5, rect1X + rect1Width, rect1Y - 5);
         gc.strokeLine(rect1X, rect1Y - 8, rect1X, rect1Y - 2);
         gc.strokeLine(rect1X + rect1Width, rect1Y - 8, rect1X + rect1Width, rect1Y - 2);
 
-        // 标注顶部右侧 16 cm 宽 - 简洁形式，与图片一致
-        gc.fillText(String.format("%.0f cm", 16.0), rect2X + rect2Width / 2 - 15, rect2Y - 10);
-        gc.strokeLine(rect2X, rect2Y - 5, rect2X + rect2Width, rect2Y - 5);
-        gc.strokeLine(rect2X, rect2Y - 8, rect2X, rect2Y - 2);
-        gc.strokeLine(rect2X + rect2Width, rect2Y - 8, rect2X + rect2Width, rect2Y - 2);
+        // 标注顶部右侧 16 cm 宽 - 使用实际的顶部位置
+        double rightTopY = rect1Y + (rect1Height - rect2Height); // 使用实际绘制时的y坐标
+        gc.fillText(String.format("%.0f cm", 16.0), rect2X + rect2Width/2 - 15, rightTopY - 10);
+        gc.strokeLine(rect2X, rightTopY - 5, rect2X + rect2Width, rightTopY - 5);
+        gc.strokeLine(rect2X, rightTopY - 8, rect2X, rightTopY - 2);
+        gc.strokeLine(rect2X + rect2Width, rightTopY - 8, rect2X + rect2Width, rightTopY - 2);
 
         // 标注右侧 16 cm 高
         double rightSideX = rect2X + rect2Width;

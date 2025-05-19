@@ -137,19 +137,19 @@ public class CompoundShapeView extends VBox {
                 timerLabel,
                 inputBox,
                 messageLabel);
-
+                
         // 更新进度显示
         shapeSelector.valueProperty().addListener((obs, oldVal, newVal) -> {
             updateProgressLabel();
         });
-
+        
         // 监听currentShapeIndex，控制输入框的禁用状态
         shapeSelector.getSelectionModel().selectedIndexProperty().addListener((obs, oldVal, newVal) -> {
             currentShapeIndex = newVal.intValue();
             answerField.setDisable(currentShapeIndex == -1);
         });
     }
-
+    
     private void updateProgressLabel() {
         // 更新进度标签和进度条
         int completedCount = completedShapes.size();
@@ -159,7 +159,7 @@ public class CompoundShapeView extends VBox {
 
         // 更新分数显示
         scoreLabel.setText("Score: " + gameController.getCurrentScore());
-
+        
         // 当所有形状都完成后，提示用户
         if (completedCount >= 9 && !completionAlertShown) {
             completionAlertShown = true;
@@ -183,10 +183,10 @@ public class CompoundShapeView extends VBox {
                         onExit.run();
                     } else {
                         // 向后兼容，如果没有设置回调则使用原有方式
-                        MainView mainView = new MainView();
-                        mainView.getGameController().setCurrentScore(gameController.getCurrentScore());
-                        getScene().setRoot(mainView);
-                    }
+            MainView mainView = new MainView();
+            mainView.getGameController().setCurrentScore(gameController.getCurrentScore());
+            getScene().setRoot(mainView);
+        }
                 }
             });
         }
@@ -217,7 +217,7 @@ public class CompoundShapeView extends VBox {
         // 获取Canvas中心点
         double centerX = canvas.getWidth() / 2;
         double centerY = canvas.getHeight() / 2;
-
+        
         // 由复合形状对象负责绘制自身
         currentShape.draw(gc, centerX, centerY);
 
@@ -283,12 +283,12 @@ public class CompoundShapeView extends VBox {
                 System.err.println("The solution image cannot be loaded: " + imagePath);
             }
         }
-
+        
         // 记录此形状已完成
         if (currentShapeIndex >= 0 && currentShapeIndex < 9) {
             if (!completedShapes.contains(currentShapeIndex)) {
-                completedShapes.add(currentShapeIndex);
-                updateProgressLabel();
+            completedShapes.add(currentShapeIndex);
+            updateProgressLabel();
             }
         }
     }
@@ -300,7 +300,7 @@ public class CompoundShapeView extends VBox {
         if (timer != null) {
             timer.cancel();
         }
-
+        
         // 重置计时器显示为初始状态
         timerLabel.setText("Time remaining: 5:00");
 
