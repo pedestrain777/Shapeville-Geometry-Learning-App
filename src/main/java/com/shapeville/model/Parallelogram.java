@@ -2,11 +2,11 @@ package com.shapeville.model;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 public class Parallelogram extends Shape2D {
     private double base;
     private double height;
-    private double shearFactor = 0.5; // 控制平行四边形的倾斜程度
 
     public Parallelogram(double base, double height) {
         super("parallelogram", Color.ORANGE, base, height);
@@ -23,13 +23,13 @@ public class Parallelogram extends Shape2D {
         gc.setStroke(Color.DARKGRAY);
         gc.setLineWidth(3);
         gc.setFill(Color.BLACK);
-        gc.setFont(javafx.scene.text.Font.font(16));
+        gc.setFont(Font.font(16));
         double textX = imgX + imgWidth + 30;
         double textY = imgY + 30;
         // Draw parallelogram
         double offset = 40;
-        double[] xPoints = {imgX + offset, imgX + imgWidth, imgX + imgWidth - offset, imgX};
-        double[] yPoints = {imgY, imgY, imgY + imgHeight, imgY + imgHeight};
+        double[] xPoints = { imgX + offset, imgX + imgWidth, imgX + imgWidth - offset, imgX };
+        double[] yPoints = { imgY, imgY, imgY + imgHeight, imgY + imgHeight };
         gc.strokePolygon(xPoints, yPoints, 4);
         // Draw base arrow
         gc.setStroke(Color.ORANGE);
@@ -55,7 +55,7 @@ public class Parallelogram extends Shape2D {
 
     @Override
     public void draw(GraphicsContext gc) {
-        // Not used in new logic
+        // 此实现为空，实际使用draw(GraphicsContext, double, double, double, double)
     }
 
     public String getFormula() {
@@ -90,4 +90,4 @@ public class Parallelogram extends Shape2D {
         newParallelogram.setRotationY(this.rotationY);
         return newParallelogram;
     }
-} 
+}

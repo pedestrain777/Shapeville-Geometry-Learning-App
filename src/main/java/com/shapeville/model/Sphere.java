@@ -8,7 +8,7 @@ public class Sphere extends Shape {
     private static final int LATITUDES = 20; // 纬度分段
 
     public Sphere(double radius) {
-        super("Sphere", Color.web("#F0E442"));  // 色盲友好黄色
+        super("Sphere", Color.web("#F0E442")); // 色盲友好黄色
         this.radius = radius;
         // 旋转影响光照和视角
         setRotationX(0);
@@ -41,7 +41,7 @@ public class Sphere extends Shape {
             double t = (double) i / LATITUDES;
             double lat = (t - 0.5) * Math.PI; // -π/2 到 π/2
 
-            int segments = 40;  // 每个纬线细分段数
+            int segments = 40; // 每个纬线细分段数
             double[] xPoints = new double[segments];
             double[] yPoints = new double[segments];
 
@@ -57,6 +57,8 @@ public class Sphere extends Shape {
 
                 // 再绕Y轴旋转
                 double x2 = x3 * Math.cos(ry) + z2 * Math.sin(ry);
+                // 虽然 zFinal 在本轮循环中未使用，但它在未来扩展中可能有用
+                @SuppressWarnings("unused")
                 double zFinal = -x3 * Math.sin(ry) + z2 * Math.cos(ry);
 
                 // 投影到2D屏幕
@@ -76,6 +78,7 @@ public class Sphere extends Shape {
             }
         }
     }
+
     @Override
     public Sphere copy() {
         Sphere newSphere = new Sphere(this.radius);

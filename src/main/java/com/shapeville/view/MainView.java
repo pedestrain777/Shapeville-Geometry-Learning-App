@@ -54,8 +54,7 @@ public class MainView extends VBox {
         HBox buttonBox = new HBox(10);
         buttonBox.setAlignment(Pos.CENTER);
         Button homeButton = new Button("Home");
-        Button endSessionButton = new Button("End Session");
-        buttonBox.getChildren().addAll(homeButton, endSessionButton);
+        buttonBox.getChildren().addAll(homeButton);
         buttonBox.setPadding(new Insets(0, 0, 5, 0));
 
         // Content area with ScrollPane for scrolling capability
@@ -82,7 +81,6 @@ public class MainView extends VBox {
 
         // Button handlers
         homeButton.setOnAction(e -> createMainMenu());
-        endSessionButton.setOnAction(e -> endSession());
     }
 
     private void createMainMenu() {
@@ -126,48 +124,42 @@ public class MainView extends VBox {
     private void startTask1() {
         contentArea.getChildren().clear();
         ShapeIdentificationView shapeView = new ShapeIdentificationView(gameController);
+        shapeView.setOnExit(() -> createMainMenu());
         contentArea.getChildren().add(shapeView);
     }
 
     private void startTask2() {
         contentArea.getChildren().clear();
         AngleIdentificationView angleView = new AngleIdentificationView(gameController);
+        angleView.setOnExit(() -> createMainMenu());
         contentArea.getChildren().add(angleView);
     }
 
     private void startTask3() {
         contentArea.getChildren().clear();
         AreaCalculationView areaView = new AreaCalculationView(gameController);
+        areaView.setOnExit(() -> createMainMenu());
         contentArea.getChildren().add(areaView);
     }
 
     private void startTask4() {
         contentArea.getChildren().clear();
         CircleCalculationView circleView = new CircleCalculationView(gameController);
+        circleView.setOnExit(() -> createMainMenu());
         contentArea.getChildren().add(circleView);
     }
 
     private void startExtra1() {
         contentArea.getChildren().clear();
         CompoundShapeView compoundView = new CompoundShapeView(gameController);
+        compoundView.setOnExit(() -> createMainMenu());
         contentArea.getChildren().add(compoundView);
     }
 
     private void startExtra2() {
         contentArea.getChildren().clear();
         SectorCalculationView sectorView = new SectorCalculationView(gameController);
+        sectorView.setOnExit(() -> createMainMenu());
         contentArea.getChildren().add(sectorView);
-    }
-
-    private void endSession() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Session Ended");
-        alert.setHeaderText("Great job!");
-        alert.setContentText("You scored " + gameController.getCurrentScore() + " points!");
-        alert.showAndWait();
-
-        // Reset game
-        gameController = new GameController();
-        createMainMenu();
     }
 }

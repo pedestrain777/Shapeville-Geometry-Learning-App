@@ -7,19 +7,23 @@ public class Circle extends Shape2D {
     private double radius;
     private double inputValue;
     private boolean inputIsDiameter;
+
     public Circle(double radius) {
         this(radius, false);
     }
+
     public Circle(double value, boolean isDiameter) {
-        super("circle", Color.RED, (isDiameter ? value/2 : value) * 2, (isDiameter ? value/2 : value) * 2);
+        super("circle", Color.RED, (isDiameter ? value / 2 : value) * 2, (isDiameter ? value / 2 : value) * 2);
         this.inputIsDiameter = isDiameter;
         this.inputValue = value;
         this.radius = isDiameter ? value / 2 : value;
     }
+
     @Override
     public double calculateArea() {
         return Math.PI * radius * radius;
     }
+
     public double calculateCircumference() {
         return 2 * Math.PI * radius;
     }
@@ -27,7 +31,7 @@ public class Circle extends Shape2D {
     @Override
     public void draw(GraphicsContext gc) {
         gc.save();
-        double centerX = x + width  / 2;
+        double centerX = x + width / 2;
         double centerY = y + height / 2;
         gc.translate(centerX, centerY);
         gc.scale(2, 2);
@@ -40,7 +44,7 @@ public class Circle extends Shape2D {
         gc.setStroke(Color.BLACK);
         gc.setLineWidth(1);
         if (inputIsDiameter) {
-            double leftX  = x;
+            double leftX = x;
             double rightX = x + width;
             gc.strokeLine(leftX, centerY, rightX, centerY);
         } else {
@@ -52,10 +56,28 @@ public class Circle extends Shape2D {
         gc.fillOval(centerX - dotSize / 2, centerY - dotSize / 2, dotSize, dotSize);
         gc.restore();
     }
+
+    // 新增：用于形状识别关卡的简单绘制方法
+    public void drawSimple(GraphicsContext gc) {
+        gc.save();
+        double centerX = x + width / 2;
+        double centerY = y + height / 2;
+        gc.translate(centerX, centerY);
+        gc.scale(1.5, 1.5);
+        gc.translate(-centerX, -centerY);
+        gc.setFill(Color.LIGHTBLUE);
+        gc.setStroke(Color.BLACK);
+        gc.setLineWidth(2);
+        gc.strokeOval(x, y, width, height);
+        gc.fillOval(x, y, width, height);
+        gc.restore();
+    }
+
     public String getInputText() {
         String unit = inputIsDiameter ? "Diameter" : "Radius";
         return String.format("%s = %.1f units", unit, inputValue);
     }
+
     public String getAreaFormula() {
         return "Area = πr²";
     }
@@ -81,6 +103,7 @@ public class Circle extends Shape2D {
         this.width = radius * 2;
         this.height = radius * 2;
     }
+
     @Override
     public Circle copy() {
         Circle newCircle = new Circle(this.radius);
