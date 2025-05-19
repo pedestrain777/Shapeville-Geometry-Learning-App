@@ -11,6 +11,7 @@ import javafx.scene.layout.HBox;
 import com.shapeville.controller.GameController;
 import com.shapeville.model.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1316,7 +1317,7 @@ public class CompoundShapeView extends VBox {
                     correctAnswer = 140.0; // 第七个图形：复合形状（五边形）
                     break;
                 case 7:
-                    correctAnswer = 3256.0; // 第八个图形：复杂矩形组合
+                    correctAnswer = 3456.0; // 第八个图形：复杂矩形组合
                     break;
                 case 8:
                     correctAnswer = 174.0; // 第九个图形：楼梯形状
